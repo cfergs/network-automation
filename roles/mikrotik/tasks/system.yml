@@ -1,0 +1,26 @@
+---
+- name: Update Hostname
+  community.routeros.api:
+    path: system identity
+    cmd: set name=steffy
+
+- name: Set Syslog Destination
+  community.routeros.api_find_and_modify:
+    path: system logging action
+    find:
+      name: remote
+    values:
+      remote: 192.168.99.99
+
+- name: Add Remote Topics
+  community.routeros.api_modify:
+    path: system logging
+    data:
+      - action: remote
+        topics: "{{ item }}"
+  with_items:
+    - critical
+    - error
+    - info
+    - warning
+    - pppoe

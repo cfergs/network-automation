@@ -1,0 +1,32 @@
+---
+repos:
+  - repo: local
+    hooks:
+      - id: ansible-lint
+        name: ansible-lint
+        entry: .venv/bin/ansible-lint
+        language: python
+        args: ["--force-color"]
+        pass_filenames: false
+        always_run: true
+        files: \.(yml)$
+        additional_dependencies:
+          - .[core]
+      - id: end-of-file-fixer
+        name: fix end of files
+        description: ensures that a file is either empty, or ends with one newline.
+        entry: .venv/bin/end-of-file-fixer
+        language: python
+        types: [text]
+      - id: requirements-txt-fixer
+        name: fix requirements.txt
+        description: sorts entries in requirements.txt.
+        entry: .venv/bin/requirements-txt-fixer
+        language: python
+        files: requirements.*\.txt$
+      - id: trailing-whitespace
+        name: trim trailing whitespace
+        description: trims trailing whitespace.
+        entry: .venv/bin/trailing-whitespace-fixer
+        language: python
+        types: [text]

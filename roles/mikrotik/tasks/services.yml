@@ -1,0 +1,27 @@
+---
+- name: Add DNS Entries
+  community.routeros.api_modify:
+    path: ip dns static
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - name: hass.chickenwaffles.net
+        address: 192.168.0.242
+      - name: jdownloader.chickenwaffles.net
+        address: 192.168.0.241
+      - name: jdownloader.chickenwaffles.net
+        address: fd00:abcd::1
+      - name: jellyfin.chickenwaffles.net
+        address: 192.168.0.242
+      - name: media.chickenwaffles.net
+        address: 192.168.0.241
+      - name: media.chickenwaffles.net
+        address: fd00:abcd::1
+      - name: mgmt.chickenwaffles.net
+        address: 192.168.0.242
+      - name: splunk.chickenwaffles.net
+        address: 192.168.0.242
+      - name: splunk-hec.chickenwaffles.net
+        address: 192.168.0.250
+      - name: unifi.chickenwaffles.net
+        address: 192.168.0.242

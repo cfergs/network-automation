@@ -1,0 +1,6 @@
+exclude_paths:
+  - .venv
+use_default_rules: true
+
+skip_list:
+  - args

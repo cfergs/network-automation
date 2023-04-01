@@ -1,0 +1,12 @@
+---
+- name: Mikrotik | System Setup
+  ansible.builtin.include_tasks: system.yml
+
+- name: Mikrotik | Services
+  ansible.builtin.include_tasks: services.yml
+
+- name: Mikrotik | Interfaces
+  ansible.builtin.include_tasks: interfaces.yml
+
+# - name: Mikrotik | FW Rules
+#  ansible.builtin.include_tasks: firewall.yml

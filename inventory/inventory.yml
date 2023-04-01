@@ -1,0 +1,6 @@
+homelab:
+  hosts:
+    steffy:
+      ansible_host:
+      ansible_user:
+      ansible_pass:

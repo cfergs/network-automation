@@ -1,0 +1,12 @@
+---
+- name: RouterOS
+  hosts: localhost
+  gather_facts: false
+  module_defaults:
+    group/community.routeros.api:
+      hostname: 192.168.5.47
+      password: 123456
+      username: admin
+      validate_certs: false
+  roles:
+    - name: mikrotik

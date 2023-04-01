@@ -1,0 +1,5 @@
+ansible-lint
+pre-commit
+pre-commit-hooks
+ansible-core
+librouteros
