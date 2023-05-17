@@ -1,12 +1,31 @@
 ---
+- name: Mikrotik | API-Setup
+  ansible.builtin.include_tasks: api-setup.yml
+  when: api_status.stdout is not search('https-cert')
+
 - name: Mikrotik | System Setup
   ansible.builtin.include_tasks: system.yml
-
-- name: Mikrotik | Services
-  ansible.builtin.include_tasks: services.yml
 
 - name: Mikrotik | Interfaces
   ansible.builtin.include_tasks: interfaces.yml
 
-# - name: Mikrotik | FW Rules
-#  ansible.builtin.include_tasks: firewall.yml
+- name: Mikrotik | Interface Lists
+  ansible.builtin.include_tasks: interface-list.yml
+
+- name: Mikrotik | Services
+  ansible.builtin.include_tasks: services.yml
+
+- name: Mikrotik | Security Settings
+  ansible.builtin.include_tasks: security.yml
+
+- name: Mikrotik | IPv4 Address Lists
+  ansible.builtin.include_tasks: address-lists-v4.yml
+
+- name: Mikrotik | IPv4 FW Rules
+  ansible.builtin.include_tasks: firewall-v4.yml
+
+- name: Mikrotik | IPv6 Address Lists
+  ansible.builtin.include_tasks: address-lists-v6.yml
+
+- name: Mikrotik | IPv6 FW Rules
+  ansible.builtin.include_tasks: firewall-v6.yml

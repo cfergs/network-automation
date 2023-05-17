@@ -1,0 +1,365 @@
+---
+- name: Firewall IPv4 NAT Rules
+  community.routeros.api_modify:
+    path: ip firewall nat
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - action: masquerade
+        chain: srcnat
+        comment: Source NAT
+        out-interface-list: WAN
+
+# https://forum.mikrotik.com/viewtopic.php?t=129194#p634832
+- name: Firewall IPv4 Mangle Rules
+  community.routeros.api_modify:
+    path: ip firewall mangle
+    data:
+      - action: change-mss
+        chain: forward
+        new-mss: clamp-to-pmtu
+        passthrough: true
+        protocol: tcp
+        tcp-flags: syn
+        log: true
+
+- name: Firewall IPv4 Rules - RAW
+  community.routeros.api_modify:
+    path: ip firewall raw
+    ensure_order: true
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      ##################
+      # PRE-ROUTING
+      ##################
+
+      # allow ether5 backdoor connectivity
+      - action: accept
+        chain: prerouting
+        comment: backdoor-allow from authorized IP's
+        src-address-list: Authorized
+      - action: accept
+        chain: prerouting
+        comment: backdoor-allow from ether5
+        in-interface: ether5
+        src-address: 192.168.88.2
+
+      # default rules
+      - action: accept
+        chain: prerouting
+        comment: "def-conf: accept DHCP discover"
+        dst-address: 255.255.255.255
+        dst-port: 67
+        in-interface-list: ALL_VLANS
+        protocol: udp
+        src-address: 0.0.0.0
+        src-port: 68
+      - action: drop
+        chain: prerouting
+        comment: "def-conf: drop bogon IP's"
+        src-address-list: BAD_IPV4
+        log: true
+        log-prefix: DROP_PREROUTING_BOGON
+      - action: drop
+        chain: prerouting
+        comment: "def-conf: drop bogon IP's"
+        dst-address-list: BAD_IPV4
+        log: true
+        log-prefix: DROP_PREROUTING_BOGON
+      - action: drop
+        chain: prerouting
+        comment: "defconf: drop bogon IP's"
+        src-address-list: BAD_SRC_IPV4
+        log: true
+        log-prefix: DROP_PREROUTING_BAD_SRC
+      - action: drop
+        chain: prerouting
+        comment: "defconf: drop bogon IP's"
+        dst-address-list: BAD_DST_IPV4
+      - action: drop
+        chain: prerouting
+        comment: "defconf: drop non global from WAN"
+        src-address-list: NOT_GLOBAL_IPV4
+        in-interface-list: WAN
+      - action: drop
+        chain: prerouting
+        comment: "defconf: drop bad UDP"
+        port: 0
+        protocol: udp
+      - action: jump
+        chain: prerouting
+        comment: "defconf: jump to TCP chain"
+        jump-target: BAD_TCP
+        protocol: tcp
+
+      ##################
+      # BAD_TCP CHAIN
+      ##################
+
+      - action: drop
+        chain: BAD_TCP
+        comment: "defconf: TCP flag filter"
+        protocol: tcp
+        tcp-flags: "!fin,!syn,!rst,!ack"
+      - action: drop
+        chain: BAD_TCP
+        comment: defconf
+        protocol: tcp
+        tcp-flags: fin,syn
+      - action: drop
+        chain: BAD_TCP
+        comment: defconf
+        protocol: tcp
+        tcp-flags: fin,rst
+      - action: drop
+        chain: BAD_TCP
+        comment: defconf
+        protocol: tcp
+        tcp-flags: fin,!ack
+      - action: drop
+        chain: BAD_TCP
+        comment: defconf
+        protocol: tcp
+        tcp-flags: fin,urg
+      - action: drop
+        chain: BAD_TCP
+        comment: defconf
+        protocol: tcp
+        tcp-flags: syn,rst
+      - action: drop
+        chain: BAD_TCP
+        comment: defconf
+        protocol: tcp
+        tcp-flags: rst,urg
+      - action: drop
+        chain: BAD_TCP
+        comment: "defconf: TCP port 0 drop"
+        port: 0
+        protocol: tcp
+
+- name: Firewall IPv4 Rules
+  community.routeros.api_modify:
+    path: ip firewall filter
+    ensure_order: true
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      ##################
+      # INPUT CHAIN - traffic coming TO router
+      ##################
+
+      # allow ether5 backdoor connectivity
+      - action: accept
+        chain: input
+        comment: backdoor-allow from authorized IP's
+        src-address-list: Authorized
+      - action: accept
+        chain: input
+        comment: backdoor-allow from ether5
+        in-interface: ether5
+        src-address: 192.168.88.2
+
+      # default rules
+      - action: accept
+        chain: input
+        comment: "defconf: accept established, related, untracked"
+        connection-state: established,related,untracked
+      - action: accept
+        chain: input
+        protocol: icmp
+        comment: "defconf: accept ICMP"
+      - action: drop
+        chain: input
+        comment: "defconf: drop invalid"
+        connection-state: invalid
+        log: true
+        log-prefix: DROP_INPUT_INVALID
+
+      # connectivity to services
+      - action: accept
+        chain: input
+        comment: Allow NTP Connectivity FROM clients
+        connection-state: new
+        dst-port: 123
+        in-interface-list: ALL_VLANS
+        protocol: udp
+      - action: accept
+        chain: input
+        comment: Allow web and ssh Connectivity FROM USER VLAN
+        dst-port: 22,443,8728,8291
+        in-interface: USER
+        protocol: tcp
+      - action: drop
+        chain: input
+        comment: Block DNS queries to router from IOT range
+        dst-port: 53
+        in-interface: IOT
+        protocol: udp
+      - action: accept
+        chain: input
+        comment: Allow DNS queries FROM other ranges
+        dst-port: 53
+        in-interface-list: ALL_VLANS
+        protocol: udp
+      - action: accept
+        chain: input
+        comment: Allow DHCP to router
+        dst-port: 67
+        in-interface-list: ALL_VLANS
+        protocol: udp
+
+      # Drop actions if not match
+      - action: reject # {optional --> useful but only if interested in tracking LAN issues }
+        chain: input
+        in-interface-list: ALL_VLANS
+        reject-with: icmp-admin-prohibited
+        log: true
+        log-prefix: REJECT_INPUT_FINAL
+      - action: drop
+        chain: input
+        comment: drop all else
+        log: true
+        log-prefix: DROP_INPUT_FINAL
+
+      ##################
+      # FORWARD CHAIN
+      ##################
+
+      - action: fasttrack-connection
+        chain: forward
+        comment: "defconf: fasttrack"
+        connection-state: established,related
+        hw-offload: true
+      - action: accept
+        chain: forward
+        comment: "defconf: accept established, related, untracked"
+        connection-state: established,related,untracked
+      - action: drop
+        chain: forward
+        connection-state: invalid
+        comment: "defconf: drop invalid"
+      - action: drop
+        chain: forward
+        comment: "defconf: drop all from WAN not DSTNATed"
+        connection-nat-state: "!dstnat"
+        connection-state: new
+        in-interface-list: WAN
+        log: true
+        log-prefix: DROP_FORWARD_nonDSTNAT
+      - action: drop
+        chain: forward
+        src-address-list: NO_FORWARD_IPV4
+        comment: "defconf: drop bad forward IPs"
+        log: true
+        log-prefix: DROP_FORWARD_BAD_IPs
+      - action: drop
+        chain: forward
+        dst-address-list: NO_FORWARD_IPV4
+        comment: "defconf: drop bad forward IPs"
+        log: true
+        log-prefix: DROP_FORWARD_BAD_IPs
+
+      # Internet Allow rules
+      # Allow for users
+      - action: accept
+        chain: forward
+        comment: allow internet traffic from user ranges
+        in-interface-list: ALLOW_INTERNET_VLAN
+        out-interface-list: WAN
+      # Allow for non user devices
+      - action: accept
+        chain: forward
+        comment: allow internet traffic to specific non user devices
+        src-address-list: INFRA_INTERNET_ALLOW
+        out-interface-list: WAN
+
+      # interface specific rules
+      # GUEST VLAN
+      - action: accept
+        chain: forward
+        comment: GUEST allow to NAS
+        dst-address: 192.168.0.11
+        dst-port: 445
+        in-interface: GUEST
+        protocol: tcp
+
+      # IOT VLAN
+      - action: accept
+        chain: forward
+        comment: IOT to mqtt
+        dst-address: 192.168.0.244
+        dst-port: 1883
+        in-interface: IOT
+        protocol: tcp
+
+      # NTWK VLAN
+      - action: accept
+        chain: forward
+        comment: NTWK to unifi(1)
+        dst-address: 192.168.0.243
+        dst-port: 8080
+        in-interface: NTWK
+        protocol: tcp
+      - action: accept
+        chain: forward
+        comment: NTWK to unifi(2)
+        dst-address: 192.168.0.243
+        dst-port: 3478,5514
+        in-interface: NTWK
+        protocol: udp
+      - action: accept
+        chain: forward
+        comment: NTWK to syslog
+        dst-address: 192.168.0.254
+        dst-port: 514
+        protocol: udp
+
+      # USER VLAN
+      - action: accept
+        chain: forward
+        comment: Allow USER to manage tasmota devices
+        dst-address-list: TASMOTA_DEVICES
+        dst-port: 80 # not smart enough to handle 443
+        in-interface: USER
+        protocol: tcp
+      - action: accept
+        chain: forward
+        comment: Allow USER to manage switch
+        dst-address: 192.168.9.10
+        dst-port: 22,80,443
+        in-interface: USER
+        protocol: tcp
+      - action: accept
+        chain: forward
+        comment: Allow USER to access NAS
+        dst-address: 192.168.0.11
+        dst-port: 22,443,445
+        in-interface: USER
+        protocol: tcp
+      - action: accept
+        chain: forward
+        comment: Allow USER range to manage kubenetes
+        dst-address: 192.168.0.225
+        dst-port: 6443
+        in-interface: USER
+        protocol: tcp
+      - action: accept
+        chain: forward
+        comment: Allow USER to manage linux servers
+        dst-address-list: LINUX_INFRA_SVRS
+        dst-port: 22,16992,16993 # 16xxx ports for intel AMT
+        protocol: tcp
+      - action: accept
+        chain: forward
+        comment: Allow USER to access ingress urls - mgmt, media and others
+        dst-address-list: INGRESS_URLS
+        dst-port: 443
+        protocol: tcp
+
+      # Final Actions
+      - action: drop
+        chain: forward
+        comment: drop all else
+        log: true
+        log-prefix: DROP_FORWARD_FINAL

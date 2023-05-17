@@ -1,4 +1,22 @@
 ---
+# NTP Configuration
+# because NTP is legacy, insecure && and uses 123 as both src/dst which is blocked
+- name: Enable IP Cloud Update-Time
+  community.routeros.api:
+    path: ip cloud
+    cmd: set ddns-enabled=no update-time=yes
+
+- name: Setup NTP Server
+  community.routeros.api:
+    path: system ntp server
+    cmd: set enabled=yes use-local-clock=yes
+
+# DNS Configuration
+- name: Configure DNS Server
+  community.routeros.api:
+    path: ip dns
+    cmd: set allow-remote-requests=yes
+
 - name: Add DNS Entries
   community.routeros.api_modify:
     path: ip dns static
@@ -25,3 +43,70 @@
         address: 192.168.0.250
       - name: unifi.chickenwaffles.net
         address: 192.168.0.242
+
+# DHCP Server Configuration
+- name: DHCP | Add server networks
+  community.routeros.api_modify:
+    path: ip dhcp-server network
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    ensure_order: true
+    data:
+      - address: 192.168.0.0/24
+        comment: INFRA network
+        dns-server: 192.168.0.1
+        gateway: 192.168.0.1
+        ntp-server: 192.168.0.1
+      - address: 192.168.5.0/24
+        comment: USER network
+        dns-server: 192.168.5.1
+        gateway: 192.168.5.1
+        ntp-server: 192.168.5.1
+      - address: 192.168.6.0/24
+        comment: GUEST network
+        dns-server: 192.168.6.1
+        gateway: 192.168.6.1
+        ntp-server: 192.168.6.1
+      - address: 192.168.7.0/24
+        comment: IOT network
+        dns-none: true
+        gateway: 192.168.7.1
+        ntp-server: 192.168.7.1
+      - address: 192.168.9.0/24
+        comment: NTWK network
+        dns-none: true
+        gateway: 192.168.9.1
+        ntp-server: 192.168.9.1
+
+- name: DHCP | Add IP Pools
+  community.routeros.api_modify:
+    path: ip pool
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    ensure_order: true
+    data:
+      - name: INFRA
+        ranges: 192.168.0.30-192.168.0.70
+      - name: USER
+        ranges: 192.168.5.10-192.168.5.50
+      - name: GUEST
+        ranges: 192.168.6.10-192.168.6.50
+      - name: IOT
+        ranges: 192.168.7.10-192.168.7.50
+      - name: NTWK
+        ranges: 192.168.9.50-192.168.9.60
+
+- name: DHCP | Create server # final act - combine server networks and IP pools
+  community.routeros.api_modify:
+    path: ip dhcp-server
+    data:
+      - name: "{{ item }}"
+        address-pool: "{{ item }}"
+        interface: "{{ item }}"
+        lease-time: 8h
+  with_items:
+    - INFRA
+    - USER
+    - GUEST
+    - IOT
+    - NTWK

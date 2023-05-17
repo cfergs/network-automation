@@ -1,5 +1,6 @@
+ansible-core
 ansible-lint
+ansible-pylibssh
+librouteros
 pre-commit
 pre-commit-hooks
-ansible-core
-librouteros

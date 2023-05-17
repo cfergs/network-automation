@@ -1,16 +1,32 @@
 ---
+- name: Create bridge
+  community.routeros.api_modify:
+    path: interface bridge
+    data:
+      - name: local
+        frame-types: admit-only-vlan-tagged
+        ingress-filtering: true
+        vlan-filtering: true
+
 - name: Get BridgeInterface name
   community.routeros.api_info:
     path: interface bridge
   register: bridge_interface
 
-# - name: Show bridge interface
-#  ansible.builtin.debug:
-#    var: bridge_interface.result
-
 - name: Set BridgeInterface fact
   ansible.builtin.set_fact:
     bridge_name: "{{ bridge_interface.result[0].name }}"
+
+- name: Configure Bridge Ports
+  community.routeros.api_modify:
+    path: interface bridge port
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - bridge: "{{ bridge_name }}"
+        interface: ether2
+        ingress-filtering: true
+        frame-types: admit-only-vlan-tagged
 
 - name: Add VLANS
   community.routeros.api_modify:
@@ -34,18 +50,60 @@
         vlan-id: 99
         interface: "{{ bridge_name }}"
 
-# VLANS
-## VLAN 5 - USER - 192.168.5.0/24
-## VLAN 6 - GUEST - 192.168.6.0/24, ntp, dns, 10-50
-## VLAN 7 - IOT - 192.168.7.0/24
-## VLAN 9 - NTWK - 192.168.9.0/24
-## VLAN 99 - INFRA - 192.168.0.0/24 - ntp,dns, 30-70
+- name: Configure IP address on interfaces
+  community.routeros.api_modify:
+    path: ip address
+    data:
+      - interface: USER
+        address: 192.168.5.1/24
+        network: 192.168.5.0
+      - interface: GUEST
+        address: 192.168.6.1/24
+        network: 192.168.6.0
+      - interface: IOT
+        address: 192.168.7.1/24
+        network: 192.168.7.0
+      - interface: NTWK
+        address: 192.168.9.1/24
+        network: 192.168.9.0
+      - interface: INFRA
+        address: 192.168.0.1/24
+        network: 192.168.0.0
 
-# LAGG
+- name: VLAN Tag Interfaces
+  community.routeros.api_modify:
+    path: interface bridge vlan
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - bridge: "{{ bridge_name }}"
+        tagged: "{{ bridge_name }},ether2"
+        vlan-ids: 5
+      - bridge: "{{ bridge_name }}"
+        tagged: "{{ bridge_name }},ether2"
+        vlan-ids: 6
+      - bridge: "{{ bridge_name }}"
+        tagged: "{{ bridge_name }},ether2"
+        vlan-ids: 7
+      - bridge: "{{ bridge_name }}"
+        tagged: "{{ bridge_name }},ether2"
+        vlan-ids: 9
+      - bridge: "{{ bridge_name }}"
+        tagged: "{{ bridge_name }},ether2"
+        vlan-ids: 99
 
-# VPN - wireguard
-
-# Set port 1 as internet
-# Set port 3 as VLAN 5
-# set port 4 as VLAN 9
-# set port 5 as VLAN 99
+- name: Create PPPoE Interface
+  community.routeros.api_modify:
+    path: interface pppoe-client
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - name: pppoe-out
+        interface: ether1
+        user: "{{ nbn_username }}"
+        password: "{{ nbn_password }}"
+        add-default-route: true
+        disabled: false
+        max-mtu: 1492
+        profile: default
+        use-peer-dns: true

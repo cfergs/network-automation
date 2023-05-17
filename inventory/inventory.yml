@@ -1,6 +1,13 @@
-homelab:
+---
+mikrotik:
   hosts:
     steffy:
-      ansible_host:
-      ansible_user:
-      ansible_pass:
+      ansible_host: 192.168.5.1
+      user: ansible
+      ansible_user: "{{ user }}"
+      ansible_pass: "{{ ansible_ssh_pass }}"
+      nbn_username:
+      nbn_password:
+
+  vars:
+    syslog_server: 192.168.0.254
