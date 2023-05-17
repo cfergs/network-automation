@@ -1,12 +1,31 @@
 ---
 - name: RouterOS
-  hosts: localhost
+  hosts: mikrotik
   gather_facts: false
   module_defaults:
     group/community.routeros.api:
-      hostname: 192.168.5.47
-      password: 123456
-      username: admin
+      hostname: "{{ ansible_host }}"
+      password: "{{ ansible_pass }}"
+      username: "{{ ansible_user }}"
       validate_certs: false
+  pre_tasks:
+    - name: Pull in ssh key on first run
+      connection: local
+      ansible.builtin.shell: |
+        ssh-keygen -F {{ ansible_host }} ||
+          ssh-keyscan -H {{ ansible_host }} >> ~/.ssh/known_hosts
+      delegate_to: 127.0.0.1
+      failed_when: false
+      check_mode: false
+      changed_when: false
+
+    - name: Check api availability
+      community.routeros.command:
+        commands:
+          - /ip/service/print where name=www-ssl and certificate=https-cert and disabled=no
+      register: api_status
+      vars:
+        ansible_user: "{{ user }}+cet512w" # temp override of username to wrap after 512characters - otherwise output returns wrong data
+
   roles:
-    - name: mikrotik
+    - role: mikrotik

@@ -1,0 +1,186 @@
+---
+- name: Firewall IPv6 Rules - RAW
+  community.routeros.api_modify:
+    path: ipv6 firewall raw
+    ensure_order: true
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      ##################
+      # PRE-ROUTING
+      ##################
+      - action: accept
+        chain: prerouting
+        comment: "defconf: enable for transparent firewall"
+        disabled: true
+      - action: accept
+        chain: prerouting
+        comment: "defconf: RFC4291, section 2.7.1"
+        src-address: ::/128
+        dst-address: ff02::1:ff00:0/104
+        icmp-options: 135
+        protocol: icmpv6
+      - action: drop
+        chain: prerouting
+        comment: "defconf: drop bogon IP's"
+        src-address-list: BAD_IPV6
+        log: true
+        log-prefix: DROPv6_PREROUTING_BOGON
+      - action: drop
+        chain: prerouting
+        comment: "defconf: drop bogon IP's"
+        dst-address-list: BAD_IPV6
+      - action: drop
+        chain: prerouting
+        comment: "defconf: drop packets with bad SRC ipv6"
+        src-address-list: BAD_SRC_IPV6
+      - action: drop
+        chain: prerouting
+        comment: "defconf: drop packets with bad dst ipv6"
+        dst-address-list: BAD_DST_IPV6
+      - action: drop
+        chain: prerouting
+        comment: "defconf: drop non global from WAN"
+        src-address-list: NOT_GLOBAL_IPV6
+        in-interface-list: WAN
+      - action: accept
+        chain: prerouting
+        comment: "defconf: accept local multicast scope"
+        dst-address: ff02::/16
+      - action: drop
+        chain: prerouting
+        comment: "defconf: drop other multicast destinations"
+        dst-address: ff00::/8
+      - action: accept
+        chain: prerouting
+        comment: "defconf: accept everything else from WAN"
+        in-interface-list: WAN
+      # - action: accept
+      #  chain: prerouting
+      #  comment: "defconf: accept everything else from LAN"
+      #  in-interface-list: EVERYTHING_INTERNAL
+      - action: drop
+        chain: prerouting
+        comment: "defconf: drop the rest"
+
+- name: Firewall IPv6 Rules
+  community.routeros.api_modify:
+    path: ipv6 firewall filter
+    ensure_order: true
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      ##################
+      # INPUT CHAIN - traffic coming TO router
+      ##################
+
+      # UDP traceroute, DHCPv6 client PD, and IPSec (IKE, AH, ESP) is accepted as per RFC recommendations.
+      - action: accept
+        chain: input
+        comment: "defconf: accept ICMPv6 after RAW"
+        protocol: icmpv6
+      - action: accept
+        chain: input
+        comment: "defconf: accept established,related,untracked"
+        connection-state: established,related,untracked
+      - action: accept
+        chain: input
+        comment: "defconf: accept UDP traceroute"
+        port: 33434-33534
+        protocol: udp
+      - action: accept
+        chain: input
+        comment: "defconf: accept DHCPv6-Client prefix delegation."
+        dst-port: 546
+        protocol: udp
+        src-address: fe80::/16
+      - action: accept
+        chain: input
+        comment: "defconf: accept IKE"
+        dst-port: 500,4500
+        protocol: udp
+      - action: accept
+        chain: input
+        comment: "defconf: accept IPSec AH"
+        protocol: ipsec-ah
+      - action: accept
+        chain: input
+        comment: "defconf: accept IPSec ESP"
+        protocol: ipsec-esp
+      - action: drop
+        chain: input
+        comment: "defconf: drop anything else not coming from LAN"
+      #  in-interface-list: "!ALL_VLANS"
+      # dropping everything else because we don't do ipv6 -- yet
+
+      ##################
+      # FORWARD CHAIN
+      ##################
+
+      - action: accept
+        chain: forward
+        comment: "defconf: accept established,related,untracked"
+        connection-state: established,related,untracked
+      - action: drop
+        chain: forward
+        comment: "defconf: drop invalid"
+        connection-state: invalid
+      - action: drop
+        chain: forward
+        src-address-list: NO_FORWARD_IPV6
+        comment: "defconf: drop bad forward IPs"
+      - action: drop
+        chain: forward
+        dst-address-list: NO_FORWARD_IPV6
+        comment: "defconf: drop bad forward IPs"
+      - action: drop
+        chain: forward
+        comment: "defconf: rfc4890 drop hop-limit: 1"
+        hop-limit: equal:1
+        protocol: icmpv6
+      - action: accept
+        chain: forward
+        comment: "defconf: accept ICMPv6 after RAW"
+        protocol: icmpv6
+      - action: accept
+        chain: forward
+        comment: "defconf: accept HIP"
+        protocol: 139
+      - action: accept
+        chain: forward
+        comment: "defconf: accept IKE"
+        protocol: udp
+        dst-port: 500,4500
+      - action: accept
+        chain: forward
+        comment: "defconf: accept AH"
+        protocol: ipsec-ah
+      - action: accept
+        chain: forward
+        comment: "defconf: accept ESP"
+        protocol: ipsec-esp
+      - action: accept
+        chain: forward
+        comment: "defconf: accept all that matches IPSec policy"
+        ipsec-policy: in,ipsec
+
+      # Internet Allow rules
+      # Allow for users
+      - action: accept
+        chain: forward
+        comment: allow internet traffic from user ranges
+        in-interface-list: ALLOW_INTERNET_VLAN
+        out-interface-list: WAN
+      # Allow for non user devices
+      - action: accept
+        chain: forward
+        comment: allow internet traffic to specific non user devices
+        src-address-list: INFRA_INTERNET_ALLOW
+        out-interface-list: WAN
+
+      # Final Actions
+      - action: drop
+        chain: forward
+        comment: "defconf: drop everything else"
+        # in-interface-list: !ALL_VLANS
+        # dropping everything else because we don't do ipv6 -- yet

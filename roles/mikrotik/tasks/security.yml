@@ -1,0 +1,38 @@
+---
+# needed to allow devices on ether5 to access winbox without using an IP address
+# still requires a password
+- name: Allow backdoor interface list to connect to winbox
+  community.routeros.api_modify:
+    path: tool mac-server mac-winbox
+    data:
+      - allowed-interface-list: BACKDOOR
+
+# Further security features that have been configured
+- name: Disable Unused Services
+  community.routeros.api_modify:
+    path: ip service
+    data:
+      - name: telnet
+        disabled: true
+      - name: ftp
+        disabled: true
+      - name: www
+        disabled: true
+
+# MikroTik Neighbor discovery protocol is used to show and recognize other MikroTik routers in the network, disable neighbor discovery on all interfaces
+- name: Disable Neighbor Discovery Protocol
+  community.routeros.api:
+    path: ip neighbor discovery-settings
+    cmd: set discover-interface-list=none
+
+# SSH: add aes-128-ctr and disallow hmac sha1 and groups with sha1
+- name: Enable SSH strong crypto
+  community.routeros.api:
+    path: ip ssh
+    cmd: set strong-crypto=yes
+
+# A bandwidth server is used to test throughput between two MikroTik routers. Disable it in the production environment:
+- name: Disable Bandwidth Server
+  community.routeros.api:
+    path: tool bandwidth-server
+    cmd: set enabled=no

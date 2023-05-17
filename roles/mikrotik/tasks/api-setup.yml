@@ -1,0 +1,33 @@
+---
+# Following enables api - much easier to use vs routeros.commands
+# once created it's not re-run (unless config is wiped)
+
+- name: Add rootca cert
+  community.routeros.command:
+    commands:
+      - /certificate add name=root-cert common-name=mikrotik days-valid=3650 key-usage=key-cert-sign,crl-sign
+  check_mode: true
+
+- name: Sign rootca cert
+  community.routeros.command:
+    commands:
+      - /certificate sign root-cert
+  check_mode: true
+
+- name: Add https cert
+  community.routeros.command:
+    commands:
+      - /certificate add name=https-cert common-name=mikrotik days-valid=3650
+  check_mode: true
+
+- name: Sign https cert
+  community.routeros.command:
+    commands:
+      - /certificate sign ca=root-cert https-cert
+  check_mode: true
+
+- name: Enable https service
+  community.routeros.command:
+    commands:
+      - /ip service set www-ssl certificate=https-cert disabled=no
+  check_mode: true

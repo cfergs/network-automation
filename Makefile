@@ -46,3 +46,9 @@ dev-environment: ${PRE_COMMIT_HOOK_STAMP} ci-environment
 clean-dev-environment: clean dev-environment
 
 clean: clean-pre-commit clean-venv
+
+
+# Ansible
+mikrotik-deploy: ci-environment
+	. .venv/bin/activate; ansible-galaxy install -r requirements.yml
+	. .venv/bin/activate; ansible-playbook mikrotik.yml

@@ -1,0 +1,60 @@
+- name: Firewall Address List v6
+  community.routeros.api_modify:
+    path: ipv6 firewall address-list
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      # NO_FORWARD_IPV6
+      - address: fe80::/10
+        comment: "defconf: RFC6890 Linked-Scoped Unicast"
+        list: NO_FORWARD_IPV6
+      - address: ff00::/8
+        comment: "defconf: multicast" # remove if used
+        list: NO_FORWARD_IPV6
+
+      # BAD_IPV6
+      - address: ::/128
+        comment: "defconf: RFC6890 lo"
+        list: BAD_IPV6
+      - address: ::ffff:0.0.0.0/96
+        comment: "defconf: ipv4-mapped"
+        list: BAD_IPV6
+      - address: 2001::/23
+        comment: "defconf: RFC6890"
+        list: BAD_IPV6
+      - address: 2001:db8::/32
+        comment: "defconf: RFC6890 documentation"
+        list: BAD_IPV6
+      - address: 2001:10::/28
+        comment: "defconf: RFC6890 orchid"
+        list: BAD_IPV6
+      - address: ::/96
+        comment: "defconf: ipv4 compat"
+        list: BAD_IPV6
+
+      # NOT_GLOBAL_IPV6
+      - address: 100::/64
+        comment: "defconf: RFC6890 Discard-only"
+        list: NOT_GLOBAL_IPV6
+      - address: 2001::/32
+        comment: "defconf: RFC6890 TEREDO"
+        list: NOT_GLOBAL_IPV6
+      - address: 2001:2::/48
+        comment: "defconf: RFC6890 Benchmark"
+        list: NOT_GLOBAL_IPV6
+      - address: fc00::/7
+        comment: "defconf: RFC6890 Unique-Local"
+        list: NOT_GLOBAL_IPV6
+
+      # BAD_DST_IPV6
+      - address: ::/128
+        comment: "defconf: unspecified"
+        list: BAD_DST_IPV6
+
+      # BAD_SRC_IPV6
+      - address: ::/128
+        comment: "defconf: unspecified"
+        list: BAD_SRC_IPV6
+      - address: ff00::/8
+        comment: "defconf: multicast"
+        list: BAD_SRC_IPV6

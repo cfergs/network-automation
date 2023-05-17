@@ -2,7 +2,12 @@
 - name: Update Hostname
   community.routeros.api:
     path: system identity
-    cmd: set name=steffy
+    cmd: "set name={{ inventory_hostname }}"
+
+- name: Set timezone
+  community.routeros.api:
+    path: system clock
+    cmd: set time-zone-name=Australia/Perth
 
 - name: Set Syslog Destination
   community.routeros.api_find_and_modify:
@@ -10,17 +15,20 @@
     find:
       name: remote
     values:
-      remote: 192.168.99.99
+      remote: "{{ syslog_server }}"
+      bsd-syslog: true
 
 - name: Add Remote Topics
   community.routeros.api_modify:
     path: system logging
     data:
       - action: remote
-        topics: "{{ item }}"
-  with_items:
-    - critical
-    - error
-    - info
-    - warning
-    - pppoe
+        topics: critical
+      - action: remote
+        topics: error
+      - action: remote
+        topics: info
+      - action: remote
+        topics: warning
+      - action: remote
+        topics: firewall

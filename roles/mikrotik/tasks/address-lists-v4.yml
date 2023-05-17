@@ -1,0 +1,127 @@
+---
+- name: Firewall Address List - v4
+  community.routeros.api_modify:
+    path: ip firewall address-list
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      # DEFAULT RULES FOR BLOCKING ACCESS
+      # BAD_IPV4
+      - address: 127.0.0.0/8
+        comment: "defconf: RFC6890"
+        list: BAD_IPV4
+      - address: 192.0.0.0/24
+        comment: "defconf: RFC6890"
+        list: BAD_IPV4
+      - address: 192.0.2.0/24
+        comment: "defconf: RFC6890 documentation"
+        list: BAD_IPV4
+      - address: 198.51.100.0/24
+        comment: "defconf: RFC6890 documentation"
+        list: BAD_IPV4
+      - address: 203.0.113.0/24
+        comment: "defconf: RFC6890 documentation"
+        list: BAD_IPV4
+      - address: 240.0.0.0/4
+        comment: "defconf: RFC6890 reserved"
+        list: BAD_IPV4
+
+      # BAD_SRC_IPV4
+      - address: 224.0.0.0/4
+        comment: "defconf: multicast"
+        list: BAD_SRC_IPV4
+      - address: 255.255.255.255
+        comment: "defconf: RFC6890"
+        list: BAD_SRC_IPV4
+
+      # BAD_DST_IPV4
+      - address: 0.0.0.0/8
+        comment: "defconf: RFC6890"
+        list: BAD_DST_IPV4
+      - address: 224.0.0.0/4
+        comment: "defconf: RFC6890"
+        list: BAD_DST_IPV4
+
+      # NO_FORWARD_IPV4 - addresses that DO NOT get forwarded when routing!
+      - address: 0.0.0.0/8
+        comment: "defconf: RFC6890"
+        list: NO_FORWARD_IPV4
+      - address: 169.254.0.0/16
+        comment: "defconf: RFC6890"
+        list: NO_FORWARD_IPV4
+      - address: 224.0.0.0/4
+        comment: "defconf: multicast"
+        list: NO_FORWARD_IPV4
+      - address: 255.255.255.255
+        comment: "defconf: RFC6890"
+        list: NO_FORWARD_IPV4
+
+      # NOT_GLOBAL_IPV4
+      - address: 0.0.0.0/8
+        comment: "defconf: RFC6890"
+        list: NOT_GLOBAL_IPV4
+      - address: 10.0.0.0/8
+        comment: "defconf: RFC6890"
+        list: NOT_GLOBAL_IPV4
+      - address: 100.64.0.0/10
+        comment: "defconf: RFC6890"
+        list: NOT_GLOBAL_IPV4
+      - address: 169.254.0.0/16
+        comment: "defconf: RFC6890"
+        list: NOT_GLOBAL_IPV4
+      - address: 172.16.0.0/12
+        comment: "defconf: RFC6890"
+        list: NOT_GLOBAL_IPV4
+      - address: 192.0.0.0/29
+        comment: "defconf: RFC6890"
+        list: NOT_GLOBAL_IPV4
+      - address: 192.168.0.0/16
+        comment: "defconf: RFC6890"
+        list: NOT_GLOBAL_IPV4
+      - address: 198.18.0.0/15
+        comment: "defconf: RFC6890 benchmark"
+        list: NOT_GLOBAL_IPV4
+      - address: 255.255.255.255
+        comment: "defconf: RFC6890"
+        list: NOT_GLOBAL_IPV4
+
+      # CUSTOM ADDRESS-LISTS
+      # LINUX_INFRA_SVRS
+      - address: 192.168.0.225
+        comment: MONTY server
+        list: LINUX_INFRA_SVRS
+      - address: 192.168.0.226
+        comment: CRACKERS server
+        list: LINUX_INFRA_SVRS
+      - address: 192.168.0.227
+        comment: MINDY server
+        list: LINUX_INFRA_SVRS
+
+      # INFRA_INTERNET_ALLOW
+      # Anything in USER/GUEST allowed internet by default
+      # NTWK or INFRA needs to be added to this list
+      - address: 192.168.0.225
+        comment: MONTY server
+        list: INFRA_INTERNET_ALLOW
+      - address: 192.168.0.226
+        comment: CRACKERS server
+        list: INFRA_INTERNET_ALLOW
+      - address: 192.168.0.227
+        comment: MINDY server
+        list: INFRA_INTERNET_ALLOW
+
+      # INGRESS_URLS
+      - address: 192.168.0.241
+        comment: external ingress
+        list: INGRESS_URLS
+      - address: 192.168.0.242
+        comment: internal ingress
+        list: INGRESS_URLS
+      - address: 192.168.0.250
+        comment: splunk ingress
+        list: INGRESS_URLS
+
+      # TASMOTA_DEVICES
+      - address: 192.168.7.10
+        comment: Server Cabinet Pwr Outlet
+        list: TASMOTA_DEVICES

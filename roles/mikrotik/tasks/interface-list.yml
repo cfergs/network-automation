@@ -1,0 +1,63 @@
+---
+- name: Create Interface List
+  community.routeros.api_modify:
+    path: interface list
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - name: EVERYTHING_INTERNAL
+        comment: ALL internal interfaces or VLANS
+      - name: BACKDOOR
+        comment: backdoor interface list
+      - name: ALL_VLANS
+        comment: VLAN interfaces
+      - name: ALLOW_INTERNET_VLAN
+        comment: specific VLAN interfaces allowed to access internet
+      - name: WAN
+        comment: WAN interfaces
+
+- name: Add Interfaces to Interfact lists
+  community.routeros.api_modify:
+    path: interface list member
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      # ALL_VLANS
+      - interface: USER
+        list: ALL_VLANS
+      - interface: GUEST
+        list: ALL_VLANS
+      - interface: IOT
+        list: ALL_VLANS
+      - interface: NTWK
+        list: ALL_VLANS
+      - interface: INFRA
+        list: ALL_VLANS
+
+      # ALLOW_INTERNET_VLAN
+      - interface: USER
+        list: ALLOW_INTERNET_VLAN
+      - interface: GUEST
+        list: ALLOW_INTERNET_VLAN
+
+      # BACKDOOR
+      - interface: ether5
+        list: BACKDOOR
+
+      # EVERYTHING_INTERNAL
+      - interface: ether5
+        list: EVERYTHING_INTERNAL
+      - interface: USER
+        list: EVERYTHING_INTERNAL
+      - interface: GUEST
+        list: EVERYTHING_INTERNAL
+      - interface: IOT
+        list: EVERYTHING_INTERNAL
+      - interface: NTWK
+        list: EVERYTHING_INTERNAL
+      - interface: INFRA
+        list: EVERYTHING_INTERNAL
+
+      # WAN
+      - interface: pppoe-out
+        list: WAN
