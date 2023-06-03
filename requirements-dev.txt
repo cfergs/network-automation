@@ -1,6 +1,6 @@
-ansible-core
-ansible-lint
-ansible-pylibssh
-librouteros
-pre-commit
-pre-commit-hooks
+-r roles/mikrotik/requirements.txt
+-r roles/unifi/requirements.txt
+ansible-core==2.15.0
+ansible-lint==6.17.0
+pre-commit==3.3.2
+pre-commit-hooks==4.4.0
