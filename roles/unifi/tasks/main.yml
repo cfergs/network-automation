@@ -1,0 +1,25 @@
+# header module_defaults cant be applied at playbook level as it only gets created in pre_steps
+# can't apply module defaults to tasks so we apply it to a block
+
+- name: Big block of code
+  module_defaults:
+    ansible.builtin.uri:
+      body_format: json
+      headers:
+        Cookie: "{{ logincookie.cookies_string }}"
+  block:
+    # Site specific settings
+    - name: Unifi | Configure Site Settings
+      ansible.builtin.include_tasks: settings.yml
+
+    # Push Notification settings
+    - name: Unifi | Configure Site Settings
+      ansible.builtin.include_tasks: push-notifications.yml
+
+    # grabbing initial network, wifi and AP group values - grab once then push into looping wireless task
+    - name: Unifi | Grab dem network values
+      ansible.builtin.include_tasks: initial-network-values.yml
+
+    - name: Unifi | Configure Wifi
+      ansible.builtin.include_tasks: wireless.yml
+      loop: "{{ wireless_networks }}"

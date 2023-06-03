@@ -1,0 +1,79 @@
+- name: Get Settings
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/rest/setting"
+    method: GET
+  register: unifi_settings_output
+
+- name: Apply Identity
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/set/setting/super_identity"
+    method: POST
+    body:
+      key: "super_identity"
+      name: "{{ identity }}"
+      hostname: "{{ inform_host }}"
+
+- name: Apply Management Settings
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/set/setting/mgmt"
+    method: POST
+    body:
+      key: "mgmt"
+      auto_upgrade: false
+
+- name: Set Country
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/set/setting/country"
+    method: POST
+    body:
+      key: "country"
+      code: "36" # Australia
+
+## Support Section
+
+- name: Customise Remote Logging
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/set/setting/rsyslogd"
+    method: POST
+    body:
+      key: "rsyslogd"
+      debug: false
+      enabled: false
+      this_controller: false
+
+## Advanced Section
+
+- name: Customise Network Analytics, Backups and Logging
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/set/setting/super_mgmt"
+    method: POST
+    body:
+      key: "super_mgmt"
+      autobackup_enabled: true
+      autobackup_cron_expr: "0 0 * * 0"
+      autobackup_days: 30
+      autobackup_max_files: 5
+      autobackup_timezone: "UTC"
+      enable_analytics: false
+      data_retention_setting_preference: "manual"
+      data_retention_time_enabled: true
+      data_retention_time_in_hours_for_5minutes_scale: 24 # 5min granularity - 1day
+      data_retention_time_in_hours_for_hourly_scale: 168 # hourly granularity - 7days
+      data_retention_time_in_hours_for_daily_scale: 744 # daily granularity - 31days
+      data_retention_time_in_hours_for_monthly_scale: 2160 # monthly granularity - 90days
+      data_retention_time_in_hours_for_others: 168 # non time-series - 7days
+      time_series_per_client_stats_enabled: false # collect historical data
+      override_inform_host: true # in conjunction with setting hostname via super_identity
+
+# This will cause wifi when first updated - initial deployments are fine
+- name: Set NTP Settings
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/set/setting/ntp"
+    method: POST
+    body:
+      key: "ntp"
+      ntp_server_1: "{{ ntp_server }}"
+      ntp_server_2: ""
+      ntp_server_3: ""
+      ntp_server_4: ""
+      setting_preference: "manual"

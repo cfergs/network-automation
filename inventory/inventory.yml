@@ -9,5 +9,32 @@ mikrotik:
       nbn_username:
       nbn_password:
 
+unifi:
+  hosts:
+    controller:
+      ansible_host: https://unifi.chickenwaffles.net
+      ansible_user: ansible
+      ansible_password:
+      identity: VOID Network
+      inform_host: 192.168.0.243 # IP of unifi loadbalancer for APs to register against
+      wireless_networks:
+        - name: THE-VOID
+          password:
+          vlan_name: USERS
+          vlan: 5
+          vlan_dhcp: 192.168.5.1
+          client_isolation: false
+        - name: THE-VOID-GUEST
+          password:
+          vlan_name: GUEST
+          vlan: 6
+          vlan_dhcp: 192.168.6.1
+          client_isolation: false
+        - name: THE-VOID-IOT
+          password:
+          vlan_name: IOT
+          vlan: 7
+          vlan_dhcp: 192.168.7.1
+          client_isolation: true
   vars:
-    syslog_server: 192.168.0.254
+    ntp_server: 192.168.9.1

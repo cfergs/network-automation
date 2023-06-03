@@ -1,6 +1,6 @@
 # network-automation
 
-## Mikrotik Overview
+# Mikrotik Overview
 
 This will create the following on a MikroTik router:
 
@@ -92,3 +92,33 @@ You will also need to run the following after the first run to kick off time upd
 * Ansible Doco: https://docs.ansible.com/ansible/devel/collections/community/routeros/
 
 -----
+-----
+# Unifi Overview
+
+This will create the following SSID's on a unifi network appliance:
+
+| SSID           | Network Range | VLAN | Notes
+|  ---           | ---           |  --- |  ---
+| THE-VOID       | USERS         | 5    |
+| THE-VOID-GUEST | GUEST         | 6    |
+| THE-VOID-IOT   | IOT           | 7    | client isolation enabled
+
+As well this configures all settings on the unifi appliance.
+
+## Starting from Scratch
+
+1. Create an ansible network account.
+    1. Change interface to legacy mode via **Settings** -> **System** -> **Advanced** -> Set **Interface** to *Legacy*
+    2. Create ansible account. Go to **Settings** -> **Admins** -> **ADD NEW ADMIN**. Use Settings:
+        1. **Invite to UniFi Network:** Manually set and share the password
+        2. **Untick** "Require the user to change the password"
+        3. **Role:** Super Administrator
+
+2. Update user, password and wireless network passwords in *inventory.yml*
+3. Deploy by running `make unifi-deploy`
+
+## References
+
+* API Overview: https://ubntwiki.com/products/software/unifi-controller/api
+* API Reverse Engineered: https://github.com/Art-of-WiFi/UniFi-API-client/blob/master/src/Client.php
+* Forum post stating ansible possibility: https://community.ui.com/questions/Its-possible-to-automate-Unifi-Controller-configs/60c753ee-ec19-43f3-b758-cfce6eae6162

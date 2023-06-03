@@ -52,3 +52,6 @@ clean: clean-pre-commit clean-venv
 mikrotik-deploy: ci-environment
 	. .venv/bin/activate; ansible-galaxy install -r requirements.yml
 	. .venv/bin/activate; ansible-playbook mikrotik.yml
+
+unifi-deploy: ci-environment
+	. .venv/bin/activate; ansible-playbook unifi.yml

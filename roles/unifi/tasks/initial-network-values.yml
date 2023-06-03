@@ -1,0 +1,23 @@
+- name: Obtain network objects
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/rest/networkconf"
+    method: GET
+  register: unifi_network_output
+
+- name: Obtain WiFi network objects
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/rest/wlanconf"
+    method: GET
+  register: unifi_wireless_output
+
+# you can group AP's - we will just use the default "All APs" group.
+# This is a mandatory value for creating SSID
+- name: Obtain AP Groups
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/v2/api/site/{{ unifi_site_name }}/apgroups"
+    method: GET
+  register: unifi_wireless_ap_group_output
+
+- name: Register AP Group ID
+  ansible.builtin.set_fact:
+    unifi_wireless_ap_group_id: "{{ unifi_wireless_ap_group_output | community.general.json_query('json[?name==`All APs`]._id') }}"
