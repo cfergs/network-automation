@@ -1,0 +1,31 @@
+---
+- name: Unifi
+  connection: local
+  hosts: unifi
+  gather_facts: false
+  pre_tasks:
+    - name: Login
+      ansible.builtin.uri:
+        url: "{{ ansible_host }}/api/login"
+        body_format: json
+        method: POST
+        body:
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
+      register: logincookie
+
+    - name: Get Site Info
+      ansible.builtin.uri:
+        url: "{{ ansible_host }}/api/self/sites"
+        body_format: json
+        method: GET
+        headers:
+          Cookie: "{{ logincookie.cookies_string }}"
+      register: site_name
+
+    - name: Register Site Name
+      ansible.builtin.set_fact:
+        unifi_site_name: "{{ site_name.json.data[0].name }}"
+
+  roles:
+    - role: unifi

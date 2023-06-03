@@ -1,0 +1,2 @@
+ansible-pylibssh==1.1.0
+librouteros==3.2.1

@@ -1,0 +1,108 @@
+- name: Configure Push Notifications
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/v2/api/site/{{ unifi_site_name }}/system-log/setting"
+    method: PUT
+    body:
+      setting_preference: "ON"
+      alert_type_settings:
+        ## Critical
+        BACKUP_CONNECTION_IN_USE: # Using Backup Internet
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        ULTE_LIMIT_WARNINGS: # UniFi LTE Data Limit Warnings
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        DEVICE_DISCOVERY: # UniFi Device Discovery/Adoption
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        DEVICE_CONNECTION: # UniFi Device Connection Change
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        BACKUP_POWER_IN_USE: # Using Backup Power
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        UNASSIGNED_DEVICE_IP_ADDRESS: # Device IP Assignment Failures
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        SMART_DEVICES_IN_USE: # SmartPower Restarts Device
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        DNS_SERVER_ISSUE: # DNS Server Issues
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        RADIUS_SERVER_ISSUE: # RADIUS Server Issues
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        ROGUE_CLIENT: # Rogue Client Detections
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        SWITCH_ISSUE: # Switch Issues
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+
+        ## Security Detections
+        THREAT_DETECTION_AND_PREVENTION: # Detection and Prevention
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+
+        ## Updates
+        FIRMWARE_UPDATE: # Device Update Statuses
+          send_email: false
+          send_mobile_push_notification: true
+          show_in_alert_page: false
+
+        ## Admin Activitiy
+        ADMIN_ACCESS: # Admin access
+          send_email: false
+          send_mobile_push_notification: true
+          show_in_alert_page: false
+
+        ## Client
+        CLIENT_CONNECTION: # Network Client Connection Change
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        VPN_CLIENT_CONNECTION: # VPN Client Connection Change
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        HOTSPOT_CLIENT_CONNECTION: # Hotspot Client Connection Change
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+        BLOCKED_CLIENT_CONNECTION_ATTEMPT: # Connection Attempts by Blocked Clients
+          send_email: false
+          send_mobile_push_notification: false
+          show_in_alert_page: false
+
+        ## AP Events
+        AP_RADAR_DETECTION: # Channel Radar Detections
+          send_email: false
+          send_mobile_push_notification: true
+          show_in_alert_page: false
+        AP_CHANNEL_CHANGE: # AP Channel Changes
+          send_email: false
+          send_mobile_push_notification: true
+          show_in_alert_page: false
+        ROGUE_ACCESS_POINT: # Rogue Access Point Detection
+          send_email: false
+          send_mobile_push_notification: true
+          show_in_alert_page: false
+
+        ## Misc
+        ADMIN_SETTING_CHANGE:
+          send_email: false
+          send_mobile_push_notification: true
+          show_in_alert_page: false

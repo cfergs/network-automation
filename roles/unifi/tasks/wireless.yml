@@ -1,0 +1,105 @@
+# POST = brand new object
+# PUT = existing object
+# in pre_tasks do query and check for name to get _id value. If PUT then use _id to update existing object
+
+############################################################
+## Part 1: Create / Update Network                        ##
+##                                                        ##
+## Network object specifies VLAN tag, DHCP guarding etc.  ##
+## Assigned to a SSID which then tags wifi traffic        ##
+############################################################
+
+##### First Step: Create / Update Network
+
+# Check if network already exists
+- name: Check for existance of network {{ item.vlan_name }}
+  ansible.builtin.set_fact:
+   # unifi_network_id: "{{ unifi_network_output.json | to_json | from_json | json_query(unifi_network_query) | join('') }}"
+    unifi_network_id: "{{ unifi_network_output.json | community.general.json_query(unifi_network_query) | join('') }}"
+  vars:
+    unifi_network_query: (data[?name=='{{ item.vlan_name }}']._id)
+
+# IF not, launch POST action to create network
+- name: Create Network {{ item.vlan_name }}
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/rest/networkconf"
+    method: POST
+    body:
+      name: "{{ item.vlan_name }}"
+      vlan: "{{ item.vlan }}"
+      vlan_enabled: true
+      purpose: "vlan-only"
+      enabled: true
+      is_nat: true
+      igmp_snooping: false
+      dhcpguard_enabled: true
+      dhcpd_ip_1: "{{ item.vlan_dhcp }}"
+  when: unifi_network_id | length == 0
+  register: unifi_new_network_id
+
+# PUT runs because network already exists (*_network_id found to be populated). Will instead run a update against network object
+- name: Update Network {{ item.vlan_name }}
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/rest/networkconf/{{ unifi_network_id }}"
+    method: PUT
+    body:
+      name: "{{ item.vlan_name }}"
+      vlan: "{{ item.vlan }}"
+      vlan_enabled: true
+      purpose: "vlan-only"
+      enabled: true
+      is_nat: true
+      igmp_snooping: false
+      dhcpguard_enabled: true
+      dhcpd_ip_1: "{{ item.vlan_dhcp }}"
+  when: unifi_network_id | length > 0
+
+# If network didn't previously exist the *_network_id value will be empty - we need to populate it for wifi SSID steps
+- name: Set new network fact for {{ item.vlan_name }}
+  ansible.builtin.set_fact:
+    unifi_network_id: "{{ unifi_new_network_id.json | community.general.json_query('data[0]._id') }}"
+  when: unifi_network_id | length == 0
+
+
+###########################################
+## Part 2: Create / Update Wireless SSID ##
+##                                       ##
+## The real meat and potatoes.           ##
+###########################################
+
+# Check if wifi SSID already exists
+- name: Check for existance of SSID {{ item.name }}
+  ansible.builtin.set_fact:
+    unifi_wireless_id: "{{ unifi_wireless_output.json | community.general.json_query(unifi_wireless_query) | join('') }}"
+  vars:
+    unifi_wireless_query: (data[?name=='{{ item.name }}']._id)
+
+# POST action - create a brand new wireless SSID as it doesnt exist
+- name: Create SSID {{ item.name }}
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/rest/wlanconf"
+    method: POST
+    body:
+      name: "{{ item.name }}"
+      x_passphrase: "{{ item.password }}"
+      networkconf_id: "{{ unifi_network_id }}"
+      setting_preference: "manual"
+      enabled: true
+      ap_group_ids: "{{ unifi_wireless_ap_group_id }}"
+      l2_isolation: "{{ item.client_isolation }}"
+  when: unifi_wireless_id | length == 0
+
+# PUT - existing network. Update object. POST would cause errors
+- name: Update SSID {{ item.name }}
+  ansible.builtin.uri:
+    url: "{{ ansible_host }}/api/s/{{ unifi_site_name }}/rest/wlanconf/{{ unifi_wireless_id }}"
+    method: PUT
+    body:
+      name: "{{ item.name }}"
+      x_passphrase: "{{ item.password }}"
+      networkconf_id: "{{ unifi_network_id }}"
+      setting_preference: "manual"
+      enabled: true
+      ap_group_ids: "{{ unifi_wireless_ap_group_id }}"
+      l2_isolation: "{{ item.client_isolation }}"
+  when: unifi_wireless_id | length > 0
