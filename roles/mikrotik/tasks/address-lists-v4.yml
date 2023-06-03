@@ -122,6 +122,6 @@
         list: INGRESS_URLS
 
       # TASMOTA_DEVICES
-      - address: 192.168.7.10
+      - address: 192.168.7.50
         comment: Server Cabinet Pwr Outlet
         list: TASMOTA_DEVICES

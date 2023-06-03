@@ -8,6 +8,8 @@ mikrotik:
       ansible_pass: "{{ ansible_ssh_pass }}"
       nbn_username:
       nbn_password:
+  vars:
+    syslog_server: 192.168.0.254
 
 unifi:
   hosts:

@@ -313,6 +313,7 @@
         comment: NTWK to syslog
         dst-address: 192.168.0.254
         dst-port: 514
+        in-interface: NTWK
         protocol: udp
 
       # USER VLAN
@@ -349,12 +350,14 @@
         comment: Allow USER to manage linux servers
         dst-address-list: LINUX_INFRA_SVRS
         dst-port: 22,16992,16993 # 16xxx ports for intel AMT
+        in-interface: USER
         protocol: tcp
       - action: accept
         chain: forward
         comment: Allow USER to access ingress urls - mgmt, media and others
         dst-address-list: INGRESS_URLS
         dst-port: 443
+        in-interface: USER
         protocol: tcp
 
       # Final Actions
