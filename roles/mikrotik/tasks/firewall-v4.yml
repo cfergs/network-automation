@@ -192,13 +192,25 @@
         protocol: tcp
       - action: drop
         chain: input
-        comment: Block DNS queries to router from IOT range
+        comment: Block TCP DNS queries to router from IOT range
+        dst-port: 53
+        in-interface: IOT
+        protocol: tcp
+      - action: drop
+        chain: input
+        comment: Block UDP DNS queries to router from IOT range
         dst-port: 53
         in-interface: IOT
         protocol: udp
       - action: accept
         chain: input
-        comment: Allow DNS queries FROM other ranges
+        comment: Allow TCP DNS queries FROM other ranges
+        dst-port: 53
+        in-interface-list: ALL_VLANS
+        protocol: tcp
+      - action: accept
+        chain: input
+        comment: Allow UDP DNS queries FROM other ranges
         dst-port: 53
         in-interface-list: ALL_VLANS
         protocol: udp
