@@ -117,6 +117,10 @@ As well this configures all settings on the unifi appliance.
 2. Update user, password and wireless network passwords in *inventory.yml*
 3. Deploy by running `make unifi-deploy`
 
+## Notes
+
+Redeploying wifi settings will cause wifi & AP to go offline. Once wifi online re-run set-inform command.
+
 ## References
 
 * API Overview: https://ubntwiki.com/products/software/unifi-controller/api

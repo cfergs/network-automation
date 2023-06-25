@@ -102,4 +102,5 @@
       enabled: true
       ap_group_ids: "{{ unifi_wireless_ap_group_id }}"
       l2_isolation: "{{ item.client_isolation }}"
+      wlan_bands: "{{ item.wlan_bands }}"
   when: unifi_wireless_id | length > 0

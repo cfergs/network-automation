@@ -26,17 +26,20 @@ unifi:
           vlan: 5
           vlan_dhcp: 192.168.5.1
           client_isolation: false
+          wlan_bands: ["2g", "5g"]
         - name: THE-VOID-GUEST
           password:
           vlan_name: GUEST
           vlan: 6
           vlan_dhcp: 192.168.6.1
           client_isolation: false
+          wlan_bands: ["2g", "5g"]
         - name: THE-VOID-IOT
           password:
           vlan_name: IOT
           vlan: 7
           vlan_dhcp: 192.168.7.1
           client_isolation: true
+          wlan_bands: ["2g"]
   vars:
     ntp_server: 192.168.9.1
