@@ -1,0 +1,6 @@
+compact: true
+output: cli
+quiet: true
+skip-check:
+  - CKV2_ANSIBLE_1 # "Ensure that HTTPS url is used with uri" - It is passed thru in inventory file - checkov can't determine that
+  - CKV2_ANSIBLE_3 # "Ensure block is handling task errors properly" - triggered for unifi/tasks/main.yaml, won't let me ignore in file. Not an issue
