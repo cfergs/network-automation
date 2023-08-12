@@ -1,6 +1,7 @@
 -r roles/mikrotik/requirements.txt
 -r roles/unifi/requirements.txt
-ansible-core==2.15.0
-ansible-lint==6.17.0
-pre-commit==3.3.2
+ansible-core==2.15.2
+ansible-lint==6.17.2
+checkov==2.3.361
+pre-commit==3.3.3
 pre-commit-hooks==4.4.0
