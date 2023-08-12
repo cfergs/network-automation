@@ -23,7 +23,7 @@ This will create the following on a MikroTik router:
 
 **INTERFACE LISTS**
 
-These Simplify firewall rules.
+These simplify firewall rules.
 * EVERYTHING_INTERNAL: ALL internal interfaces or VLANS
 * BACKDOOR: physical interfaces allowing backdoor access - just ether5
 * ALL_VLANS: Contains all VLAN interfaces
@@ -42,7 +42,7 @@ These Simplify firewall rules.
 Available for IPv4 and IPv6. IPv6 is enough to allow recommended ports and block traffic between vlans as we're not yet ready for IPv6.
 
 Both leverage interface rules and address lists.
-From a conceptual viewpoint we are preventing from the WAN any dodgy traffic, BOGONS, inbound traffic not part of already established connection. Between networks we are preventing multicast or broadcast and denying/allowing specific use cases.
+From a conceptual viewpoint we are preventing from the WAN any dodgy traffic, BOGONS & inbound traffic not part of already established connection. Between networks we are preventing multicast or broadcast and denying/allowing specific use cases.
 
 Lastly we are leveraging prefiltering to apply before routing (forwarding) to minimise DDOS type attacks from the internet and also using fasttrack so established/related packets don't need to be tracked by the router. Fasttrack typically reduces CPU usage - important as the router doesnt have the fastest CPU.
 
@@ -54,6 +54,8 @@ Aside from firewall rules,
 * Disabled CDP, LLDP, MNDP (neighbour discovery)
 
 ## Starting from Scratch
+
+**These steps assume you have installed the winbox application**
 
 To start from scratch with no default configuration, select **System** -> **Reset Configuration** -> tick **No Default Configuration** -> select **Reset Configuration**
 
@@ -70,12 +72,12 @@ After the device has restarted follow steps:
 ```
 
 5. Update **/inventory/inventory.yml**, set **ansible_host** to 192.168.88.1 and update passwords
-6. Launch ansible-playbook
-7. Ansible will first run api-setup.yml playbook which connects via ssh to device and generates certificate. Then used to configure https. Once this is done further configuration can take place using the API. This is only needed to be done on first deployment.
+6. Launch ansible-playbook with `make mikrotik-deploy`
+    1. **What it does**: Ansible on it's first launch runs the api-setup.yml playbook which connects via ssh to device and generates a certificate. Then this is used to configure https. Once this is done further configuration takes place using the API.
 
-After running playbook for the first time update **inventory.yml** with correct device IP. Future runs don't require being connected to ether5
+7. After running playbook for the first time update **inventory.yml** with correct device IP. Future runs don't require being connected to ether5
 
-You will also need to run the following after the first run to kick off time update:
+8. As a final step, kick off an initial time synchronization:
 ```
 /ip/cloud/force-update
 ```
@@ -83,7 +85,8 @@ You will also need to run the following after the first run to kick off time upd
 ## Outstanding
 
 * API is unable to enable graphing
-
+* Investigate how to automate initial time synchronization
+* Issues with redeploying to an existing device which has been reset - need to clear the ssh known hosts file.
 
 ## References
 
