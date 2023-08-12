@@ -23,6 +23,10 @@
     handle_absent_entries: remove
     handle_entries_content: remove_as_much_as_possible
     data:
+      - name: flux.chickenwaffles.net
+        address: 192.168.0.242
+      - name: grafana.chickenwaffles.net
+        address: 192.168.0.250
       - name: hass.chickenwaffles.net
         address: 192.168.0.242
       - name: jdownloader.chickenwaffles.net
