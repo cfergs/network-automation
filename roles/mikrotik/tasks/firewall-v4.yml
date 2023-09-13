@@ -267,6 +267,12 @@
         dst-port: 22,443,8729,8291
         in-interface: USER
         protocol: tcp
+      - action: accept
+        chain: input
+        comment: Allow prometheus monitoring
+        dst-port: 8729 # API_HTTPS
+        src-address-list: LINUX_INFRA_SVRS # kubernetes cluster
+        protocol: tcp
       - action: drop
         chain: input
         comment: Block TCP DNS queries to router from IOT range
