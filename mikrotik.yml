@@ -7,7 +7,8 @@
       hostname: "{{ ansible_host }}"
       password: "{{ ansible_pass }}"
       username: "{{ ansible_user }}"
-      validate_certs: false
+      tls: true
+      validate_certs: false # required because we're using a self-signed cert on router (lets-encrypt requires TCP 80 open for cert-gen which is a no-no)
   pre_tasks:
     - name: Pull in ssh key on first run
       connection: local

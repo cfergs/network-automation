@@ -12,6 +12,8 @@
   community.routeros.api_modify:
     path: ip service
     data:
+      - name: api # non ssl port - 8728
+        disabled: true
       - name: telnet
         disabled: true
       - name: ftp

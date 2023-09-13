@@ -1,16 +1,4 @@
 ---
-# NTP Configuration
-# because NTP is legacy, insecure && and uses 123 as both src/dst which is blocked
-- name: Enable IP Cloud Update-Time && ddns
-  community.routeros.api:
-    path: ip cloud
-    cmd: set ddns-enabled=yes update-time=yes
-
-- name: Setup NTP Server
-  community.routeros.api:
-    path: system ntp server
-    cmd: set enabled=yes use-local-clock=yes
-
 # DNS Configuration
 - name: Configure DNS Server
   community.routeros.api:
@@ -29,16 +17,12 @@
         address: 192.168.0.250
       - name: hass.chickenwaffles.net
         address: 192.168.0.242
-      - name: jdownloader.chickenwaffles.net
-        address: 192.168.0.241
-      - name: jdownloader.chickenwaffles.net
-        address: fd00:abcd::1
       - name: jellyfin.chickenwaffles.net
         address: 192.168.0.242
       - name: media.chickenwaffles.net
         address: 192.168.0.241
       - name: media.chickenwaffles.net
-        address: fd00:abcd::1
+        address: fd00:abcd::1 # so doesnt resolve to cloudflare tunnel record when resolving internally
       - name: mgmt.chickenwaffles.net
         address: 192.168.0.242
       - name: splunk.chickenwaffles.net
@@ -47,6 +31,27 @@
         address: 192.168.0.250
       - name: unifi.chickenwaffles.net
         address: 192.168.0.242
+
+# Creates a *.sn.mynetname.net record
+- name: Enable IP Cloud ddns
+  community.routeros.api:
+    path: ip cloud
+    cmd: set ddns-enabled=yes update-time=no
+
+# NTP Configuration
+# May require a 123:123 FW port to be opened on mirkotik
+- name: Setup NTP Client
+  community.routeros.api_modify:
+    path: system ntp client
+    data:
+      - enabled: true
+        mode: unicast
+        servers: 0.au.pool.ntp.org,1.au.pool.ntp.org
+
+- name: Setup NTP Server
+  community.routeros.api:
+    path: system ntp server
+    cmd: set enabled=yes manycast=yes
 
 # DHCP Server Configuration
 - name: DHCP | Add server networks
