@@ -29,16 +29,12 @@
         address: 192.168.0.250
       - name: hass.chickenwaffles.net
         address: 192.168.0.242
-      - name: jdownloader.chickenwaffles.net
-        address: 192.168.0.241
-      - name: jdownloader.chickenwaffles.net
-        address: fd00:abcd::1
       - name: jellyfin.chickenwaffles.net
         address: 192.168.0.242
       - name: media.chickenwaffles.net
         address: 192.168.0.241
       - name: media.chickenwaffles.net
-        address: fd00:abcd::1
+        address: fd00:abcd::1 # so doesnt resolve to cloudflare tunnel record when resolving internally
       - name: mgmt.chickenwaffles.net
         address: 192.168.0.242
       - name: splunk.chickenwaffles.net

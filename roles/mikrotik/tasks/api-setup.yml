@@ -29,5 +29,6 @@
 - name: Enable https service
   community.routeros.command:
     commands:
-      - /ip service set www-ssl certificate=https-cert disabled=no
+      - /ip service set api-ssl certificate=https-cert disabled=no tls-version=only-1.2
+      - /ip service set www-ssl certificate=https-cert disabled=no tls-version=only-1.2
   check_mode: true

@@ -50,7 +50,7 @@ Lastly we are leveraging prefiltering to apply before routing (forwarding) to mi
 **FURTHER SECURITY MEASURES**
 
 Aside from firewall rules,
-* Unused services such as telnet, http, ftp are disabled.
+* Unused services such as api (non-https), telnet, http, ftp are disabled.
 * Enabled SSH strong crypto
 * Disabled CDP, LLDP, MNDP (neighbour discovery)
 

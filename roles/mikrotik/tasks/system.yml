@@ -21,14 +21,27 @@
 - name: Add Remote Topics
   community.routeros.api_modify:
     path: system logging
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
     data:
+      # Builtin Topics - Don't remove
+      - action: echo
+        topics: critical
+      - action: memory
+        topics: error
+      - action: memory
+        topics: info
+      - action: memory
+        topics: warning
+
+      # Custom Topics
       - action: remote
         topics: critical
       - action: remote
         topics: error
       - action: remote
+        topics: firewall
+      - action: remote
         topics: info
       - action: remote
         topics: warning
-      - action: remote
-        topics: firewall

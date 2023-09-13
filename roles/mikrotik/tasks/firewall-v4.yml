@@ -49,11 +49,15 @@
       - action: accept
         chain: prerouting
         comment: backdoor-allow from authorized IP's
+        log: true
+        log-prefix: ACCEPT_PREROUTING_BACKDOOR
         src-address-list: Authorized
       - action: accept
         chain: prerouting
         comment: backdoor-allow from ether5
         in-interface: ether5
+        log: true
+        log-prefix: ACCEPT_PREROUTING_BACKDOOR
         src-address: 192.168.88.2
 
       # default rules
@@ -83,19 +87,34 @@
         comment: "defconf: drop bogon IP's"
         src-address-list: BAD_SRC_IPV4
         log: true
-        log-prefix: DROP_PREROUTING_BAD_SRC
+        log-prefix: DROP_PREROUTING_BOGON
+
+      # Don't log Foxtel Go Box trying to connect to uPnP. It's spams logs
+      # EVENT: preroutin: in:ether1 out:(unknown 0), connection-state:invalid src-mac bc:30:d9:ef:c4:6a, proto UDP, 172.16.50.1:58411->239.255.255.250:1900
+      - action: drop
+        chain: prerouting
+        comment: reject Foxtel Go Box uPnP requests
+        src-mac-address: BC:30:D9:EF:C4:6A
+        dst-address-list: BAD_DST_IPV4
+
       - action: drop
         chain: prerouting
         comment: "defconf: drop bogon IP's"
         dst-address-list: BAD_DST_IPV4
+        log: true
+        log-prefix: DROP_PREROUTING_BOGON
       - action: drop
         chain: prerouting
         comment: "defconf: drop non global from WAN"
-        src-address-list: NOT_GLOBAL_IPV4
         in-interface-list: WAN
+        log: true
+        log-prefix: DROP_PREROUTING_NON_GLOBAL_FROM_WAN
+        src-address-list: NOT_GLOBAL_IPV4
       - action: drop
         chain: prerouting
         comment: "defconf: drop bad UDP"
+        log: true
+        log-prefix: DROP_PREROUTING_BAD_UDP
         port: 0
         protocol: udp
       - action: jump
@@ -111,41 +130,57 @@
       - action: drop
         chain: BAD_TCP
         comment: "defconf: TCP flag filter"
+        log: true
+        log-prefix: DROP_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: "!fin,!syn,!rst,!ack"
       - action: drop
         chain: BAD_TCP
         comment: defconf
+        log: true
+        log-prefix: DROP_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: fin,syn
       - action: drop
         chain: BAD_TCP
         comment: defconf
+        log: true
+        log-prefix: DROP_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: fin,rst
       - action: drop
         chain: BAD_TCP
         comment: defconf
+        log: true
+        log-prefix: DROP_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: fin,!ack
       - action: drop
         chain: BAD_TCP
         comment: defconf
+        log: true
+        log-prefix: DROP_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: fin,urg
       - action: drop
         chain: BAD_TCP
         comment: defconf
+        log: true
+        log-prefix: DROP_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: syn,rst
       - action: drop
         chain: BAD_TCP
         comment: defconf
+        log: true
+        log-prefix: DROP_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: rst,urg
       - action: drop
         chain: BAD_TCP
         comment: "defconf: TCP port 0 drop"
+        log: true
+        log-prefix: DROP_CHAIN_BAD_TCP
         port: 0
         protocol: tcp
 
@@ -164,11 +199,15 @@
       - action: accept
         chain: input
         comment: backdoor-allow from authorized IP's
+        log: true
+        log-prefix: ACCEPT_INPUT_BACKDOOR
         src-address-list: Authorized
       - action: accept
         chain: input
         comment: backdoor-allow from ether5
         in-interface: ether5
+        log: true
+        log-prefix: ACCEPT_INPUT_BACKDOOR
         src-address: 192.168.88.2
 
       # default rules
@@ -224,8 +263,8 @@
         protocol: udp
       - action: accept
         chain: input
-        comment: Allow web and ssh Connectivity FROM USER VLAN
-        dst-port: 22,443,8728,8291
+        comment: Allow web, api and ssh Connectivity FROM USER VLAN
+        dst-port: 22,443,8729,8291
         in-interface: USER
         protocol: tcp
       - action: drop
