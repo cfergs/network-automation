@@ -20,6 +20,7 @@ This will create the following on a MikroTik router:
 * ether4: unused
 * ether5: not part of bridge, backdoor for when i break config. IP is 192.168.88.1
 * pppoe-out: Used by NBN provider as they require pppoe
+* wireguard: VPN
 
 **INTERFACE LISTS**
 
@@ -27,7 +28,7 @@ These simplify firewall rules.
 * EVERYTHING_INTERNAL: ALL internal interfaces or VLANS
 * BACKDOOR: physical interfaces allowing backdoor access - just ether5
 * ALL_VLANS: Contains all VLAN interfaces
-* ALLOW_INTERNET_VLAN: specific VLAN interfaces allowed to access internet - USER and GUEST only
+* ALLOW_INTERNET_RANGES: specific interfaces allowed to access internet - USER, GUEST VLANS and WireGuard VPN only
 * WAN: WAN interfaces - ether1 or pppoe-out
 
 **SERVICES**

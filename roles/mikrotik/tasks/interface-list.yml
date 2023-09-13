@@ -11,12 +11,12 @@
         comment: backdoor interface list
       - name: ALL_VLANS
         comment: VLAN interfaces
-      - name: ALLOW_INTERNET_VLAN
-        comment: specific VLAN interfaces allowed to access internet
+      - name: ALLOW_INTERNET_RANGES
+        comment: specific device interfaces allowed to access internet
       - name: WAN
         comment: WAN interfaces
 
-- name: Add Interfaces to Interfact lists
+- name: Add Interfaces to Interface lists
   community.routeros.api_modify:
     path: interface list member
     handle_absent_entries: remove
@@ -34,11 +34,13 @@
       - interface: INFRA
         list: ALL_VLANS
 
-      # ALLOW_INTERNET_VLAN
+      # ALLOW_INTERNET_RANGES
       - interface: USER
-        list: ALLOW_INTERNET_VLAN
+        list: ALLOW_INTERNET_RANGES
       - interface: GUEST
-        list: ALLOW_INTERNET_VLAN
+        list: ALLOW_INTERNET_RANGES
+      - interface: wireguard
+        list: ALLOW_INTERNET_RANGES
 
       # BACKDOOR
       - interface: ether5

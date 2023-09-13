@@ -5,6 +5,17 @@
     handle_absent_entries: remove
     handle_entries_content: remove_as_much_as_possible
     data:
+      - action: dst-nat
+        chain: dstnat
+        comment: Wireguard allow
+        disabled: false
+        dst-port: 51820
+        in-interface-list: WAN
+        log: true
+        log-prefix: DST-NAT_DSTNAT_WIREGUARD
+        to-addresses: 172.16.32.1
+        to-ports: 51820
+        protocol: udp
       - action: masquerade
         chain: srcnat
         comment: Source NAT
@@ -176,6 +187,33 @@
         log: true
         log-prefix: DROP_INPUT_INVALID
 
+      # WireGuard Special Rules
+      - action: accept
+        chain: input
+        comment: Allow WireGuard Connectivity
+        dst-port: 51820
+        in-interface-list: WAN
+        log: true
+        log-prefix: ACCEPT_INPUT_WIREGUARD
+        protocol: udp
+
+      - action: accept
+        chain: input
+        comment: Allow TCP DNS queries FROM WireGuard
+        dst-port: 53
+        in-interface: wireguard
+        log: true
+        log-prefix: ACCEPT_INPUT_WIREGUARD
+        protocol: tcp
+      - action: accept
+        chain: input
+        comment: Allow UDP DNS queries FROM WireGuard
+        dst-port: 53
+        in-interface: wireguard
+        log: true
+        log-prefix: ACCEPT_INPUT_WIREGUARD
+        protocol: udp
+
       # connectivity to services
       - action: accept
         chain: input
@@ -276,8 +314,8 @@
       # Allow for users
       - action: accept
         chain: forward
-        comment: allow internet traffic from user ranges
-        in-interface-list: ALLOW_INTERNET_VLAN
+        comment: allow internet traffic from user/vpn ranges
+        in-interface-list: ALLOW_INTERNET_RANGES
         out-interface-list: WAN
       # Allow for non user devices
       - action: accept
@@ -370,6 +408,22 @@
         dst-address-list: INGRESS_URLS
         dst-port: 443
         in-interface: USER
+        protocol: tcp
+
+      # WireGuard VPN
+      - action: accept
+        chain: forward
+        comment: Allow WireGuard to manage linux servers
+        dst-address-list: LINUX_INFRA_SVRS
+        dst-port: 22,16992,16993 # 16xxx ports for intel AMT
+        in-interface: wireguard
+        protocol: tcp
+      - action: accept
+        chain: forward
+        comment: Allow WireGuard to access ingress urls - mgmt, media and others
+        dst-address-list: INGRESS_URLS
+        dst-port: 443
+        in-interface: wireguard
         protocol: tcp
 
       # Final Actions

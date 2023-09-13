@@ -169,7 +169,7 @@
       - action: accept
         chain: forward
         comment: allow internet traffic from user ranges
-        in-interface-list: ALLOW_INTERNET_VLAN
+        in-interface-list: ALLOW_INTERNET_RANGES
         out-interface-list: WAN
       # Allow for non user devices
       - action: accept
