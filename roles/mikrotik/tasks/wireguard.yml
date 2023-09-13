@@ -1,0 +1,32 @@
+- name: Create Wireguard Interface
+  community.routeros.api_modify:
+    path: interface wireguard
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - name: wireguard
+        mtu: 1412 # when using PPPoE - https://www.hitoha.moe/wireguard-mtu-over-pppoe/
+        listen-port: 51820
+
+- name: Configure Wireguard IP address
+  community.routeros.api_modify:
+    path: ip address
+    data:
+      - interface: wireguard
+        address: 172.16.32.1/24
+        network: 172.16.32.0
+
+- name: Configure Wireguard Peers
+  community.routeros.api_modify:
+    path: interface wireguard peers
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - allowed-address: 172.16.32.2/32
+        interface: wireguard
+        comment: Colin Android
+        public-key: LFezMEJ0eBCqLO9N7cE5wy7m9ardlMGcIWs65SexjX4=
+      - allowed-address: 172.16.32.3/32
+        interface: wireguard
+        comment: Colin MacBook
+        public-key: Ii/eUwOrDBPd/nfqs8BUMTWcpqtsa+vT4NZjLNKRJ1I=

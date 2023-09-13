@@ -1,0 +1,25 @@
+name: Tests
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    branches:
+      - main
+
+permissions: read-all
+
+jobs:
+  test:
+    name: Linting Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main
+
+      - name: Checkov GitHub Action
+        uses: bridgecrewio/checkov-action@v12
+        if: success() || failure() # run if ansible-lint fails
+        with:
+          output_format: cli
+          output_file_path: console
+          quiet: true

@@ -1,10 +1,10 @@
 ---
 # NTP Configuration
 # because NTP is legacy, insecure && and uses 123 as both src/dst which is blocked
-- name: Enable IP Cloud Update-Time
+- name: Enable IP Cloud Update-Time && ddns
   community.routeros.api:
     path: ip cloud
-    cmd: set ddns-enabled=no update-time=yes
+    cmd: set ddns-enabled=yes update-time=yes
 
 - name: Setup NTP Server
   community.routeros.api:
