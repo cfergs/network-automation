@@ -4,7 +4,7 @@
 
 This will create the following on a MikroTik router:
 
-**VLANS**
+**NETWORKS**
 | VLAN  | ID  | IP Range       | Notes
 |  ---  | --- |      ---       |  ---
 | USER  | 5   | 192.168.5.0/24 | Trusted network for user devices            |
@@ -12,6 +12,8 @@ This will create the following on a MikroTik router:
 | IOT   | 7   | 192.168.7.0/24 | No internet access, restricted access       |
 | NTWK  | 9   | 192.168.9.0/24 | No internet access, restricted access       |
 | INFRA | 99  | 192.168.0.0/24 | Internet access granted to specific servers |
+
+Wireguard Range: 172.16.32.0/24
 
 **INTERFACES**
 * ether1: WAN port (+ pppoe-out uses this interface )
@@ -32,11 +34,11 @@ These simplify firewall rules.
 * WAN: WAN interfaces - ether1 or pppoe-out
 
 **SERVICES**
-* NTP Client: Not used, ip cloud time functionality used instead (NTP sucks)
-* NTP Server: Announcing time to anyone who asks. Uses routers local clock (updated via ip-time)
+* NTP: Announcing time to anyone who asks.
 * DHCP Server: Available for for VLANS 5,6,7,9,99. IPv4 only
 * Syslog: Logging specific topics to local syslog server. Forwarded into splunk.
 * DNS: Provides DNS functionality. Also used to resolve various internal services via static entries
+* Dynamic DNS: Using built in one provided by Mikrotik
 
 **FIREWALL RULES**
 
@@ -66,7 +68,7 @@ After the device has restarted follow steps:
 3. Login to device and set admin password
 4. Next run the following commands to create ansible user/group and configure ether5
 ```
-/user/group/add name=ansible policy=api,ssh,read,write
+/user/group/add name=ansible policy=ssh,read,write,policy,test,api
 /user/add name=ansible password="<<password_here>" comment="ansible automation user" group=ansible
 
 /ip address/add interface=ether5 address=192.168.88.1/24 network=192.168.88.0
@@ -78,16 +80,14 @@ After the device has restarted follow steps:
 
 7. After running playbook for the first time update **inventory.yml** with correct device IP. Future runs don't require being connected to ether5
 
-8. As a final step, kick off an initial time synchronization:
-```
-/ip/cloud/force-update
-```
+8. As a final step, confirm NTP time synchronization is occuring
 
 ## Outstanding
 
 * API is unable to enable graphing
-* Investigate how to automate initial time synchronization
+* Investigate initial time synchronization further
 * Issues with redeploying to an existing device which has been reset - need to clear the ssh known hosts file.
+* Manage prometheus user in code.
 
 ## References
 
