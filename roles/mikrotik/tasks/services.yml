@@ -14,7 +14,7 @@
       - name: flux.chickenwaffles.net
         address: 192.168.0.242
       - name: grafana.chickenwaffles.net
-        address: 192.168.0.250
+        address: 192.168.0.242
       - name: hass.chickenwaffles.net
         address: 192.168.0.242
       - name: jellyfin.chickenwaffles.net
