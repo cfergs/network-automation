@@ -1,0 +1,27 @@
+---
+- name: Manage Graphing Times
+  community.routeros.api:
+    path: tool graphing
+    cmd: set store-every=5min page-refresh=300
+
+- name: Manage Graphing Access
+  community.routeros.api_modify:
+    path: tool graphing resource
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - allow-address: 0.0.0.0/0
+        store-on-disk: true
+
+- name: Manage Graphing
+  community.routeros.api_modify:
+    path: tool graphing interface
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - interface: GUEST
+      - interface: INFRA
+      - interface: IOT
+      - interface: NTWK
+      - interface: USER
+      - interface: ether1
