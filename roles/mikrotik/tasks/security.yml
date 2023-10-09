@@ -38,3 +38,8 @@
   community.routeros.api:
     path: tool bandwidth-server
     cmd: set enabled=no
+
+- name: Ensure UPnP is disabled
+  community.routeros.api:
+    path: ip upnp
+    cmd: set enabled=no allow-disable-external-interface=no show-dummy-rule=yes

@@ -18,6 +18,9 @@
 - name: Mikrotik | Services
   ansible.builtin.include_tasks: services.yml
 
+- name: Mikrotik | Graphing
+  ansible.builtin.include_tasks: graphing.yml
+
 - name: Mikrotik | Security Settings
   ansible.builtin.include_tasks: security.yml
 
