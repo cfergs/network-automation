@@ -256,6 +256,23 @@
       # connectivity to services
       - action: accept
         chain: input
+        comment: Allow Android phone to manage Mikrotik router using mobile app
+        dst-port: 8291
+        in-interface: wireguard
+        log-prefix: ACCEPT_INPUT_WIREGUARD
+        protocol: tcp
+        src-address: 172.16.32.2
+      - action: accept
+        chain: input
+        comment: Allow Colin laptop to manage Mikrotik router
+        dst-port: 443,8291,8729
+        in-interface: wireguard
+        log-prefix: ACCEPT_INPUT_WIREGUARD
+        protocol: tcp
+        src-address-list: WIREGUARD_COLIN_MGMT_ALLOW
+
+      - action: accept
+        chain: input
         comment: Allow NTP Connectivity FROM clients
         connection-state: new
         dst-port: 123
@@ -458,11 +475,36 @@
       # WireGuard VPN
       - action: accept
         chain: forward
+        comment: Allow Wireguard to manage kubernetes
+        dst-address: 192.168.0.225
+        dst-port: 6443
+        in-interface: wireguard
+        protocol: tcp
+        src-address-list: WIREGUARD_COLIN_MGMT_ALLOW
+      - action: accept
+        chain: forward
+        comment: Allow Wireguard to manage switch
+        dst-address: 192.168.9.10
+        dst-port: 80
+        in-interface: wireguard
+        protocol: tcp
+        src-address-list: WIREGUARD_COLIN_MGMT_ALLOW
+      - action: accept
+        chain: forward
+        comment: Allow Wireguard to manage NAS
+        dst-address: 192.168.0.11
+        dst-port: 443
+        in-interface: wireguard
+        protocol: tcp
+        src-address-list: WIREGUARD_COLIN_MGMT_ALLOW
+      - action: accept
+        chain: forward
         comment: Allow WireGuard to manage linux servers
         dst-address-list: LINUX_INFRA_SVRS
         dst-port: 22,16992,16993 # 16xxx ports for intel AMT
         in-interface: wireguard
         protocol: tcp
+        src-address-list: WIREGUARD_COLIN_MGMT_ALLOW
       - action: accept
         chain: forward
         comment: Allow WireGuard to access ingress urls - mgmt, media and others

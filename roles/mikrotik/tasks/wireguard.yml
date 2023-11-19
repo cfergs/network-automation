@@ -30,3 +30,7 @@
         interface: wireguard
         comment: Colin MacBook
         public-key: Ii/eUwOrDBPd/nfqs8BUMTWcpqtsa+vT4NZjLNKRJ1I=
+      - allowed-address: 172.16.32.4/32
+        interface: wireguard
+        comment: Colin Fedora
+        public-key: p6lGb3Jp8AoZkPQBxClwBKwyEX6gnu/+sNDvXV7qSQo=
