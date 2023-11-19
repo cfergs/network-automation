@@ -117,9 +117,6 @@
       - address: 192.168.0.242
         comment: internal ingress
         list: INGRESS_URLS
-      - address: 192.168.0.250
-        comment: splunk ingress
-        list: INGRESS_URLS
 
       # TASMOTA_DEVICES
       - address: 192.168.7.49
