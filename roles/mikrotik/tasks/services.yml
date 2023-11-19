@@ -11,6 +11,7 @@
     handle_absent_entries: remove
     handle_entries_content: remove_as_much_as_possible
     data:
+      # ipv4
       - name: flux.chickenwaffles.net
         address: 192.168.0.242
       - name: grafana.chickenwaffles.net
@@ -21,8 +22,6 @@
         address: 192.168.0.242
       - name: media.chickenwaffles.net
         address: 192.168.0.241
-      - name: media.chickenwaffles.net
-        address: fd00:abcd::1 # so doesnt resolve to cloudflare tunnel record when resolving internally
       - name: mgmt.chickenwaffles.net
         address: 192.168.0.242
       - name: splunk.chickenwaffles.net
@@ -31,6 +30,24 @@
         address: 192.168.0.250
       - name: unifi.chickenwaffles.net
         address: 192.168.0.242
+
+      # ipv6 - dummy record to prevent resolving to cloudflare tunnel record when accessing internally/vpn
+      - name: flux.chickenwaffles.net
+        address: fd00:abcd::1
+      - name: grafana.chickenwaffles.net
+        address: fd00:abcd::1
+      - name: hass.chickenwaffles.net
+        address: fd00:abcd::1
+      - name: jellyfin.chickenwaffles.net
+        address: fd00:abcd::1
+      - name: media.chickenwaffles.net
+        address: fd00:abcd::1
+      - name: mgmt.chickenwaffles.net
+        address: fd00:abcd::1
+      - name: splunk.chickenwaffles.net
+        address: fd00:abcd::1
+      - name: unifi.chickenwaffles.net
+        address: fd00:abcd::1
 
 # Creates a *.sn.mynetname.net record
 - name: Enable IP Cloud ddns
