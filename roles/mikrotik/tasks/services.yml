@@ -38,8 +38,6 @@
         address: fd00:abcd::1
       - name: hass.chickenwaffles.net
         address: fd00:abcd::1
-      - name: jellyfin.chickenwaffles.net
-        address: fd00:abcd::1
       - name: media.chickenwaffles.net
         address: fd00:abcd::1
       - name: mgmt.chickenwaffles.net
