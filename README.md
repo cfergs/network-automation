@@ -125,6 +125,8 @@ As well this configures all settings on the unifi appliance.
 
 Redeploying wifi settings will cause wifi & AP to go offline. Once wifi online re-run set-inform command.
 
+Login to AP via `ssh -o RSAMinSize=1024 admin@AP`
+
 ## References
 
 * API Overview: https://ubntwiki.com/products/software/unifi-controller/api
