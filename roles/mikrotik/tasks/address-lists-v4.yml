@@ -40,6 +40,7 @@
         list: BAD_DST_IPV4
       - address: 224.0.0.0/4
         comment: "defconf: RFC6890"
+        disabled: true
         list: BAD_DST_IPV4
 
       # NO_FORWARD_IPV4 - addresses that DO NOT get forwarded when routing!

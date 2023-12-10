@@ -60,6 +60,40 @@
         log-prefix: ACCEPT_PREROUTING_BACKDOOR
         src-address: 192.168.88.2
 
+      # Custom rules to drop random stuff
+      # 1. Stop unifi AP's from trying to continually poll Mikrotik. Unifi be annoying
+      - action: drop
+        chain: prerouting
+        comment: drop unifi discovery protocol # don't log as it just spams
+        dst-address: 255.255.255.255
+        dst-port: 10001
+        protocol: udp
+        in-interface: NTWK
+      # 2. Drop Seagate NAS multicast and don't log.
+      # Used by Sdrive app to connect to Seagate NAS. Blocked as only use SMB or Jellyfin to access content
+      # https://www.seagate.com/au/en/manuals/network-storage/business-storage-nas-os/remote-access/sdrive/
+      # in:INFRA out:(unknown 0), connection-state:invalid src-mac 00:10:75:4d:f1:de, proto UDP, 192.168.0.11:46961->224.0.0.1:4448
+      - action: drop
+        chain: prerouting
+        comment: drop seagate multicast
+        dst-address: 224.0.0.0/4
+        src-address: 192.168.0.11
+      # 3. Drop Seagate NAS Broadcast
+      # EVENT: input: in:INFRA out:(unknown 0), connection-state:new src-mac 00:10:75:4d:f1:de, proto UDP, 192.168.0.11:137->192.168.0.255:137
+      # EVENT: input: in:INFRA out:(unknown 0), connection-state:new src-mac 00:10:75:4d:f1:de, proto UDP, 192.168.0.11:138->192.168.0.255:138
+      - action: drop
+        chain: prerouting
+        comment: drop seagate multicast
+        dst-address: 192.168.0.255
+        src-address: 192.168.0.11
+      # 4. Don't log Foxtel Go Box trying to connect to uPnP. It's spams logs
+      # EVENT: preroutin: in:ether1 out:(unknown 0), connection-state:invalid src-mac bc:30:d9:ef:c4:6a, proto UDP, 172.16.50.1:58411->239.255.255.250:1900
+      - action: drop
+        chain: prerouting
+        comment: reject Foxtel Go Box uPnP requests
+        dst-address: 224.0.0.0/4
+        src-mac-address: BC:30:D9:EF:C4:6A
+
       # default rules
       - action: accept
         chain: prerouting
@@ -72,34 +106,25 @@
         src-port: 68
       - action: drop
         chain: prerouting
-        comment: "def-conf: drop bogon IP's"
+        comment: "def-conf: drop bad src IPs"
         src-address-list: BAD_IPV4
         log: true
         log-prefix: DROP_PREROUTING_BOGON
       - action: drop
         chain: prerouting
-        comment: "def-conf: drop bogon IP's"
+        comment: "def-conf: drop bad dst IPs"
         dst-address-list: BAD_IPV4
         log: true
         log-prefix: DROP_PREROUTING_BOGON
       - action: drop
         chain: prerouting
-        comment: "defconf: drop bogon IP's"
+        comment: "defconf: drop bad src IPs"
         src-address-list: BAD_SRC_IPV4
         log: true
         log-prefix: DROP_PREROUTING_BOGON
-
-      # Don't log Foxtel Go Box trying to connect to uPnP. It's spams logs
-      # EVENT: preroutin: in:ether1 out:(unknown 0), connection-state:invalid src-mac bc:30:d9:ef:c4:6a, proto UDP, 172.16.50.1:58411->239.255.255.250:1900
       - action: drop
         chain: prerouting
-        comment: reject Foxtel Go Box uPnP requests
-        src-mac-address: BC:30:D9:EF:C4:6A
-        dst-address-list: BAD_DST_IPV4
-
-      - action: drop
-        chain: prerouting
-        comment: "defconf: drop bogon IP's"
+        comment: "defconf: drop bad dst IPs"
         dst-address-list: BAD_DST_IPV4
         log: true
         log-prefix: DROP_PREROUTING_BOGON
@@ -131,56 +156,56 @@
         chain: BAD_TCP
         comment: "defconf: TCP flag filter"
         log: true
-        log-prefix: DROP_CHAIN_BAD_TCP
+        log-prefix: DROP_PREROUTING_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: "!fin,!syn,!rst,!ack"
       - action: drop
         chain: BAD_TCP
         comment: defconf
         log: true
-        log-prefix: DROP_CHAIN_BAD_TCP
+        log-prefix: DROP_PREROUTING_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: fin,syn
       - action: drop
         chain: BAD_TCP
         comment: defconf
         log: true
-        log-prefix: DROP_CHAIN_BAD_TCP
+        log-prefix: DROP_PREROUTING_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: fin,rst
       - action: drop
         chain: BAD_TCP
         comment: defconf
         log: true
-        log-prefix: DROP_CHAIN_BAD_TCP
+        log-prefix: DROP_PREROUTING_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: fin,!ack
       - action: drop
         chain: BAD_TCP
         comment: defconf
         log: true
-        log-prefix: DROP_CHAIN_BAD_TCP
+        log-prefix: DROP_PREROUTING_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: fin,urg
       - action: drop
         chain: BAD_TCP
         comment: defconf
         log: true
-        log-prefix: DROP_CHAIN_BAD_TCP
+        log-prefix: DROP_PREROUTING_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: syn,rst
       - action: drop
         chain: BAD_TCP
         comment: defconf
         log: true
-        log-prefix: DROP_CHAIN_BAD_TCP
+        log-prefix: DROP_PREROUTING_CHAIN_BAD_TCP
         protocol: tcp
         tcp-flags: rst,urg
       - action: drop
         chain: BAD_TCP
         comment: "defconf: TCP port 0 drop"
         log: true
-        log-prefix: DROP_CHAIN_BAD_TCP
+        log-prefix: DROP_PREROUTING_CHAIN_BAD_TCP
         port: 0
         protocol: tcp
 
@@ -213,12 +238,12 @@
       # default rules
       - action: accept
         chain: input
-        comment: "defconf: accept established, related, untracked"
-        connection-state: established,related,untracked
+        comment: "defconf: accept ICMP after RAW"
+        protocol: icmp
       - action: accept
         chain: input
-        protocol: icmp
-        comment: "defconf: accept ICMP"
+        comment: "defconf: accept established, related, untracked"
+        connection-state: established,related,untracked
       - action: drop
         chain: input
         comment: "defconf: drop invalid"
@@ -236,30 +261,12 @@
         log-prefix: ACCEPT_INPUT_WIREGUARD
         protocol: udp
 
-      - action: accept
-        chain: input
-        comment: Allow TCP DNS queries FROM WireGuard
-        dst-port: 53
-        in-interface: wireguard
-        log: true
-        log-prefix: ACCEPT_INPUT_WIREGUARD
-        protocol: tcp
-      - action: accept
-        chain: input
-        comment: Allow UDP DNS queries FROM WireGuard
-        dst-port: 53
-        in-interface: wireguard
-        log: true
-        log-prefix: ACCEPT_INPUT_WIREGUARD
-        protocol: udp
-
       # connectivity to services
       - action: accept
         chain: input
         comment: Allow Android phone to manage Mikrotik router using mobile app
         dst-port: 8291
         in-interface: wireguard
-        log-prefix: ACCEPT_INPUT_WIREGUARD
         protocol: tcp
         src-address: 172.16.32.2
       - action: accept
@@ -267,7 +274,6 @@
         comment: Allow Colin laptop to manage Mikrotik router
         dst-port: 443,8291,8729
         in-interface: wireguard
-        log-prefix: ACCEPT_INPUT_WIREGUARD
         protocol: tcp
         src-address-list: WIREGUARD_COLIN_MGMT_ALLOW
 
@@ -290,6 +296,14 @@
         dst-port: 8729 # API_HTTPS
         src-address-list: LINUX_INFRA_SVRS # kubernetes cluster
         protocol: tcp
+      - action: accept
+        chain: input
+        comment: Allow DHCP to router
+        dst-port: 67
+        in-interface-list: ALL_VLANS
+        protocol: udp
+
+      # DNS time
       - action: drop
         chain: input
         comment: Block TCP DNS queries to router from IOT range
@@ -316,9 +330,15 @@
         protocol: udp
       - action: accept
         chain: input
-        comment: Allow DHCP to router
-        dst-port: 67
-        in-interface-list: ALL_VLANS
+        comment: Allow TCP DNS queries FROM WireGuard
+        dst-port: 53
+        in-interface: wireguard
+        protocol: tcp
+      - action: accept
+        chain: input
+        comment: Allow UDP DNS queries FROM WireGuard
+        dst-port: 53
+        in-interface: wireguard
         protocol: udp
 
       # Drop actions if not match
@@ -349,8 +369,8 @@
         connection-state: established,related,untracked
       - action: drop
         chain: forward
-        connection-state: invalid
         comment: "defconf: drop invalid"
+        connection-state: invalid
       - action: drop
         chain: forward
         comment: "defconf: drop all from WAN not DSTNATed"
