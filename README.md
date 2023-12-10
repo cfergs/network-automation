@@ -5,15 +5,16 @@
 This will create the following on a MikroTik router:
 
 **NETWORKS**
-| VLAN  | ID  | IP Range       | Notes
-|  ---  | --- |      ---       |  ---
-| USER  | 5   | 192.168.5.0/24 | Trusted network for user devices            |
-| GUEST | 6   | 192.168.6.0/24 | Access to internet and NAS files            |
-| IOT   | 7   | 192.168.7.0/24 | No internet access, restricted access       |
-| NTWK  | 9   | 192.168.9.0/24 | No internet access, restricted access       |
-| INFRA | 99  | 192.168.0.0/24 | Internet access granted to specific servers |
+| VLAN  | ID  | IPv4 Range     | IPv6  | Notes
+|  ---  | --- |      ---       |  ---  | ---
+| USER  | 5   | 192.168.5.0/24 | Yes   | Trusted network for user devices            |
+| GUEST | 6   | 192.168.6.0/24 | Yes   | Access to internet and NAS files            |
+| IOT   | 7   | 192.168.7.0/24 | No    | No internet access, restricted access       |
+| NTWK  | 9   | 192.168.9.0/24 | No    | No internet access, restricted access       |
+| INFRA | 99  | 192.168.0.0/24 | Yes   | Internet access granted to specific servers |
 
-Wireguard Range: 172.16.32.0/24
+* Wireguard Range: 172.16.32.0/24
+* IPv6 is assigned from ISP provided prefix
 
 **INTERFACES**
 * ether1: WAN port (+ pppoe-out uses this interface )
@@ -42,7 +43,7 @@ These simplify firewall rules.
 
 **FIREWALL RULES**
 
-Available for IPv4 and IPv6. IPv6 is enough to allow recommended ports and block traffic between vlans as we're not yet ready for IPv6.
+Available for IPv4 and IPv6.
 
 Both leverage interface rules and address lists.
 From a conceptual viewpoint we are preventing from the WAN any dodgy traffic, BOGONS & inbound traffic not part of already established connection. Between networks we are preventing multicast or broadcast and denying/allowing specific use cases.

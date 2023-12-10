@@ -1,4 +1,11 @@
-- name: Firewall Address List v6
+---
+- name: Get INFRA Prefix
+  community.routeros.api:
+    path: ipv6 pool used
+    query: "prefix info WHERE info == INFRA"
+  register: ntwk_prefix
+
+- name: Firewall Address List IPv6
   community.routeros.api_modify:
     path: ipv6 firewall address-list
     handle_absent_entries: remove
@@ -9,11 +16,11 @@
         comment: "defconf: RFC6890 Linked-Scoped Unicast"
         list: NO_FORWARD_IPV6
       - address: ff00::/8
-        comment: "defconf: multicast" # remove if used
+        comment: "defconf: multicast"
         list: NO_FORWARD_IPV6
 
       # BAD_IPV6
-      - address: ::/128
+      - address: ::1/128
         comment: "defconf: RFC6890 lo"
         list: BAD_IPV6
       - address: ::ffff:0.0.0.0/96
@@ -58,3 +65,17 @@
       - address: ff00::/8
         comment: "defconf: multicast"
         list: BAD_SRC_IPV6
+
+      # INFRA_INTERNET_ALLOW
+      # Anything in USER/GUEST allowed internet by default
+      # NTWK or INFRA needs to be added to this list
+      # TO-DO: multi-wan
+      - address: "{{ ntwk_prefix.msg[0].prefix.split('::')[0] }}:dacb:8aff:feb9:46e2/128"
+        comment: MONTY server
+        list: INFRA_INTERNET_ALLOW_IPV6
+      - address: "{{ ntwk_prefix.msg[0].prefix.split('::')[0] }}:223:24ff:fe6f:2c81/128"
+        comment: CRACKERS server
+        list: INFRA_INTERNET_ALLOW_IPV6
+      - address: "{{ ntwk_prefix.msg[0].prefix.split('::')[0] }}:6651:6ff:fe41:647f/128"
+        comment: MINDY server
+        list: INFRA_INTERNET_ALLOW_IPV6

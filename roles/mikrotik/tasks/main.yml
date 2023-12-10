@@ -9,6 +9,9 @@
 - name: Mikrotik | Interfaces
   ansible.builtin.include_tasks: interfaces.yml
 
+- name: Mikrotik | IPv6
+  ansible.builtin.include_tasks: ipv6.yml
+
 - name: Mikrotik | Wireguard
   ansible.builtin.include_tasks: wireguard.yml
 
