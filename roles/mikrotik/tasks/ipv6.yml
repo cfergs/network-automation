@@ -1,0 +1,42 @@
+---
+- name: Get IPv6 prefix from ISP
+  community.routeros.api_modify:
+    path: ipv6 dhcp-client
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - interface: pppoe-out
+        add-default-route: false
+        pool-name: ISP
+        pool-prefix-length: 64 # this is not what your ISP provides but what your subnets will be split up to
+        request: address,prefix # address assigns IP to router WAN interface
+        use-peer-dns: false
+
+- name: Configure IP address on interfaces
+  community.routeros.api_modify:
+    path: ipv6 address
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - interface: USER
+        advertise: true
+        from-pool: ISP
+      - interface: GUEST
+        advertise: true
+        from-pool: ISP
+      - interface: INFRA
+        advertise: true
+        from-pool: ISP
+
+# https://www.daryllswer.com/ipv6-router-advertisement-why-is-it-enabled-by-default-on-some-network-vendors/
+- name: Modify Neighbor Discovery
+  community.routeros.api_modify:
+    path: ipv6 nd
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+    data:
+      - interface: all
+        disabled: true
+      - interface: GUEST
+      - interface: INFRA
+      - interface: USER

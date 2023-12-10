@@ -9,6 +9,16 @@
       ##################
       # PRE-ROUTING
       ##################
+      # Custom rules to drop random stuff
+      # 1. Stop unifi AP's from trying to continually poll Mikrotik. Unifi be annoying
+      - action: drop
+        chain: prerouting
+        comment: reject unifi discovery protocol # don't log as it just spams
+        dst-address: ff02::1/128
+        dst-port: 10001
+        in-interface: NTWK
+        protocol: udp
+
       - action: accept
         chain: prerouting
         comment: "defconf: enable for transparent firewall"
@@ -18,18 +28,20 @@
         comment: "defconf: RFC4291, section 2.7.1"
         src-address: ::/128
         dst-address: ff02::1:ff00:0/104
-        icmp-options: 135
+        icmp-options: 135:0-255
         protocol: icmpv6
       - action: drop
         chain: prerouting
         comment: "defconf: drop bogon IP's"
         src-address-list: BAD_IPV6
         log: true
-        log-prefix: DROPv6_PREROUTING_BOGON
+        log-prefix: DROP_PREROUTING_BOGON_IPV6
       - action: drop
         chain: prerouting
         comment: "defconf: drop bogon IP's"
         dst-address-list: BAD_IPV6
+        log: true
+        log-prefix: DROP_PREROUTING_BOGON_IPV6
       - action: drop
         chain: prerouting
         comment: "defconf: drop packets with bad SRC ipv6"
@@ -43,6 +55,8 @@
         comment: "defconf: drop non global from WAN"
         src-address-list: NOT_GLOBAL_IPV6
         in-interface-list: WAN
+        log: true
+        log-prefix: DROP_PREROUTING_NOT_GLOBAL_IPV6
       - action: accept
         chain: prerouting
         comment: "defconf: accept local multicast scope"
@@ -51,17 +65,8 @@
         chain: prerouting
         comment: "defconf: drop other multicast destinations"
         dst-address: ff00::/8
-      - action: accept
-        chain: prerouting
-        comment: "defconf: accept everything else from WAN"
-        in-interface-list: WAN
-      # - action: accept
-      #  chain: prerouting
-      #  comment: "defconf: accept everything else from LAN"
-      #  in-interface-list: EVERYTHING_INTERNAL
-      - action: drop
-        chain: prerouting
-        comment: "defconf: drop the rest"
+        log: true
+        log-prefix: DROP_PREROUTING_OTHER_MULTICAST_IPV6
 
 - name: Firewall IPv6 Rules
   community.routeros.api_modify:
@@ -93,7 +98,7 @@
         comment: "defconf: accept DHCPv6-Client prefix delegation."
         dst-port: 546
         protocol: udp
-        src-address: fe80::/16
+        src-address: fe80::/10
       - action: accept
         chain: input
         comment: "defconf: accept IKE"
@@ -107,11 +112,13 @@
         chain: input
         comment: "defconf: accept IPSec ESP"
         protocol: ipsec-esp
+
+      # Drop actions if not match
       - action: drop
         chain: input
-        comment: "defconf: drop anything else not coming from LAN"
-      #  in-interface-list: "!ALL_VLANS"
-      # dropping everything else because we don't do ipv6 -- yet
+        comment: drop all else
+        log: true
+        log-prefix: DROP_INPUT_FINAL_IPV6
 
       ##################
       # FORWARD CHAIN
@@ -125,6 +132,8 @@
         chain: forward
         comment: "defconf: drop invalid"
         connection-state: invalid
+        log: true
+        log-prefix: DROP_FORWARD_INVALID_IPV6
       - action: drop
         chain: forward
         src-address-list: NO_FORWARD_IPV6
@@ -175,12 +184,12 @@
       - action: accept
         chain: forward
         comment: allow internet traffic to specific non user devices
-        src-address-list: INFRA_INTERNET_ALLOW
+        src-address-list: INFRA_INTERNET_ALLOW_IPV6
         out-interface-list: WAN
 
       # Final Actions
       - action: drop
         chain: forward
         comment: "defconf: drop everything else"
-        # in-interface-list: !ALL_VLANS
-        # dropping everything else because we don't do ipv6 -- yet
+        log: true
+        log-prefix: DROP_FORWARD_FINAL_IPV6
