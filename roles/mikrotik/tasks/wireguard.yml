@@ -26,10 +26,10 @@
         interface: wireguard
         comment: Colin Android
         public-key: LFezMEJ0eBCqLO9N7cE5wy7m9ardlMGcIWs65SexjX4=
-      - allowed-address: 172.16.32.3/32
-        interface: wireguard
-        comment: Colin MacBook
-        public-key: Ii/eUwOrDBPd/nfqs8BUMTWcpqtsa+vT4NZjLNKRJ1I=
+      # - allowed-address: 172.16.32.3/32
+      #  interface: wireguard
+      #  comment:
+      #  public-key:
       - allowed-address: 172.16.32.4/32
         interface: wireguard
         comment: Colin Fedora
