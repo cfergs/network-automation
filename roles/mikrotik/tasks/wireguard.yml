@@ -34,3 +34,11 @@
         interface: wireguard
         comment: Colin Fedora
         public-key: p6lGb3Jp8AoZkPQBxClwBKwyEX6gnu/+sNDvXV7qSQo=
+      # - allowed-address: 172.16.32.5/32
+      #  interface: wireguard
+      #  comment: Colin Windows 11
+      #  public-key:
+      - allowed-address: 172.16.32.6/32
+        interface: wireguard
+        comment: Tash Laptop
+        public-key: xvts1rtQVFG19AmsGIJaA440OD4e9S07xqq/RXLjc2s=
