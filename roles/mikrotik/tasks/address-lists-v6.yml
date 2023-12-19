@@ -3,7 +3,7 @@
   community.routeros.api:
     path: ipv6 pool used
     query: "prefix info WHERE info == INFRA"
-  register: ntwk_prefix
+  register: infra_prefix
 
 - name: Firewall Address List IPv6
   community.routeros.api_modify:
@@ -70,12 +70,12 @@
       # Anything in USER/GUEST allowed internet by default
       # NTWK or INFRA needs to be added to this list
       # TO-DO: multi-wan
-      - address: "{{ ntwk_prefix.msg[0].prefix.split('::')[0] }}:dacb:8aff:feb9:46e2/128"
+      - address: "{{ infra_prefix.msg[0].prefix.split('::')[0] }}:dacb:8aff:feb9:46e2/128"
         comment: MONTY server
         list: INFRA_INTERNET_ALLOW_IPV6
-      - address: "{{ ntwk_prefix.msg[0].prefix.split('::')[0] }}:223:24ff:fe6f:2c81/128"
+      - address: "{{ infra_prefix.msg[0].prefix.split('::')[0] }}:223:24ff:fe6f:2c81/128"
         comment: CRACKERS server
         list: INFRA_INTERNET_ALLOW_IPV6
-      - address: "{{ ntwk_prefix.msg[0].prefix.split('::')[0] }}:6651:6ff:fe41:647f/128"
+      - address: "{{ infra_prefix.msg[0].prefix.split('::')[0] }}:6651:6ff:fe41:647f/128"
         comment: MINDY server
         list: INFRA_INTERNET_ALLOW_IPV6
