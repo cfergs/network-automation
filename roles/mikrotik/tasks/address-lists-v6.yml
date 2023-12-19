@@ -76,6 +76,3 @@
       - address: "{{ infra_prefix.msg[0].prefix.split('::')[0] }}:223:24ff:fe6f:2c81/128"
         comment: CRACKERS server
         list: INFRA_INTERNET_ALLOW_IPV6
-      - address: "{{ infra_prefix.msg[0].prefix.split('::')[0] }}:6651:6ff:fe41:647f/128"
-        comment: MINDY server
-        list: INFRA_INTERNET_ALLOW_IPV6

@@ -107,9 +107,6 @@
       - address: 192.168.0.226
         comment: CRACKERS server
         list: INFRA_INTERNET_ALLOW
-      - address: 192.168.0.227
-        comment: MINDY server
-        list: INFRA_INTERNET_ALLOW
 
       # INGRESS_URLS
       - address: 192.168.0.241
