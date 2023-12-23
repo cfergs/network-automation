@@ -42,3 +42,7 @@
         interface: wireguard
         comment: Tash Laptop
         public-key: xvts1rtQVFG19AmsGIJaA440OD4e9S07xqq/RXLjc2s=
+      - allowed-address: 172.16.32.7/32
+        interface: wireguard
+        comment: Tash iPhone
+        public-key: TZs58GERbOLsNYkDQvLBhZ23rvM+RT9Jv70yNoRNh20=
