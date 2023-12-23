@@ -272,7 +272,7 @@
       - action: accept
         chain: input
         comment: Allow Colin laptop to manage Mikrotik router
-        dst-port: 443,8291,8729
+        dst-port: 22,443,8291,8729
         in-interface: wireguard
         protocol: tcp
         src-address-list: WIREGUARD_COLIN_MGMT_ALLOW
