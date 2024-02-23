@@ -61,5 +61,5 @@
         list: EVERYTHING_INTERNAL
 
       # WAN
-      - interface: pppoe-out
+      - interface: ether1
         list: WAN

@@ -5,7 +5,6 @@
     handle_entries_content: remove_as_much_as_possible
     data:
       - name: wireguard
-        mtu: 1412 # when using PPPoE - https://www.hitoha.moe/wireguard-mtu-over-pppoe/
         listen-port: 51820
 
 - name: Configure Wireguard IP address

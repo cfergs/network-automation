@@ -5,8 +5,8 @@
     handle_absent_entries: remove
     handle_entries_content: remove_as_much_as_possible
     data:
-      - interface: pppoe-out
-        add-default-route: false
+      - interface: ether1
+        add-default-route: true
         pool-name: ISP
         pool-prefix-length: 64 # this is not what your ISP provides but what your subnets will be split up to
         request: address,prefix # address assigns IP to router WAN interface

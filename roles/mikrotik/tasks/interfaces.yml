@@ -92,18 +92,12 @@
         tagged: "{{ bridge_name }},ether2"
         vlan-ids: 99
 
-- name: Create PPPoE Interface
+- name: Create Internet Interface
   community.routeros.api_modify:
-    path: interface pppoe-client
+    path: ip dhcp-client
     handle_absent_entries: remove
     handle_entries_content: remove_as_much_as_possible
     data:
-      - name: pppoe-out
-        interface: ether1
-        user: "{{ nbn_username }}"
-        password: "{{ nbn_password }}"
+      - interface: ether1
         add-default-route: true
-        disabled: false
-        max-mtu: 1492
-        profile: default
         use-peer-dns: true

@@ -17,12 +17,11 @@ This will create the following on a MikroTik router:
 * IPv6 is assigned from ISP provided prefix
 
 **INTERFACES**
-* ether1: WAN port (+ pppoe-out uses this interface )
+* ether1: WAN port
 * ether2: Trunk port to HPe 1910 switch
 * ether3: unused
 * ether4: unused
 * ether5: not part of bridge, backdoor for when i break config. IP is 192.168.88.1
-* pppoe-out: Used by NBN provider as they require pppoe
 * wireguard: VPN
 
 **INTERFACE LISTS**
@@ -32,7 +31,7 @@ These simplify firewall rules.
 * BACKDOOR: physical interfaces allowing backdoor access - just ether5
 * ALL_VLANS: Contains all VLAN interfaces
 * ALLOW_INTERNET_RANGES: specific interfaces allowed to access internet - USER, GUEST VLANS and WireGuard VPN only
-* WAN: WAN interfaces - ether1 or pppoe-out
+* WAN: WAN interfaces - ether1
 
 **SERVICES**
 * NTP: Announcing time to anyone who asks.
