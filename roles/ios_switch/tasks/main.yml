@@ -1,0 +1,6 @@
+---
+- name: Base Configuration
+  ansible.builtin.include_tasks: base.yml
+
+- name: Interfaces
+  ansible.builtin.include_tasks: interfaces.yml

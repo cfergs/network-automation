@@ -1,0 +1,34 @@
+---
+- name: Cisco Classic IOS Access List Change
+  hosts: switch
+  gather_facts: false
+  pre_tasks:
+    - name: Gather local user facts only
+      ansible.builtin.setup:
+        gather_subset:
+          - '!all'
+          - '!min'
+          - user
+
+    # cisco algorithms are legacy and not allowed in linux by default. Failure to configure will prevent login
+    # cisco does not provide newer algorithms for this version of IOS
+    - name: Modify .ssh config file
+      ansible.builtin.blockinfile:
+        path: "{{ ansible_facts['user_dir'] }}/.ssh/config"
+        block: |
+          Host {{ ansible_host }}
+            KexAlgorithms +diffie-hellman-group14-sha1
+            HostKeyAlgorithms +ssh-rsa
+            PubkeyAcceptedKeyTypes +ssh-rsa
+            RSAMinSize +1024
+        create: true
+        mode: "644"
+        state: present
+
+  roles:
+    - role: ios_switch
+
+  post_tasks:
+    - name: Save running to startup when modified
+      cisco.ios.ios_config:
+        save_when: modified

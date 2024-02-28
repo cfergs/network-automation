@@ -1,4 +1,9 @@
 ---
+all:
+  vars:
+    syslog_server: 192.168.0.254
+    ntp_server: 192.168.9.1
+
 mikrotik:
   hosts:
     steffy:
@@ -6,8 +11,17 @@ mikrotik:
       user: ansible
       ansible_user: "{{ user }}"
       ansible_pass: "{{ ansible_ssh_pass }}"
-  vars:
-    syslog_server: 192.168.0.254
+
+switch:
+  hosts:
+    cosmo:
+      ansible_host: 192.168.9.10
+      ansible_user: ansible
+      ansible_ssh_pass:
+      ansible_connection: ansible.netcommon.network_cli
+      ansible_network_os: ios
+      ansible_become_method: enable
+      ansible_libssh_host_key_checking: false
 
 unifi:
   hosts:
@@ -39,5 +53,3 @@ unifi:
           vlan_dhcp: 192.168.7.1
           client_isolation: true
           wlan_bands: ["2g"]
-  vars:
-    ntp_server: 192.168.9.1
