@@ -7,7 +7,7 @@ repos:
         entry: env LC_ALL=C.UTF-8 .venv/bin/ansible-lint
         language: python
         args: ["--force-color"]
-        pass_filenames: false
+        pass_filenames: true
         always_run: true
         files: \.(yml)$
         additional_dependencies:

@@ -1,0 +1,64 @@
+- name: Configure Hostname
+  cisco.ios.ios_hostname:
+    config:
+      hostname: "{{ inventory_hostname }}"
+    state: merged
+
+- name: Configure the login banner
+  cisco.ios.ios_banner:
+    banner: motd
+    text: |
+      GREETINGS PROFESSOR FALKEN.
+      SHALL WE PLAY A GAME?
+    state: present
+
+- name: Stop DNS Lookups
+  cisco.ios.ios_system:
+    lookup_enabled: false
+
+- name: Syslog
+  cisco.ios.ios_logging_global:
+    config:
+      hosts:
+        - hostname: "{{ syslog_server }}"
+      trap: informational
+    state: overridden
+
+- name: Apply NTP Settings
+  cisco.ios.ios_ntp_global:
+    config:
+      servers:
+        - server: "{{ ntp_server }}"
+          prefer: true
+    state: overridden
+
+- name: Configure the default gateway & timezone
+  cisco.ios.ios_config:
+    lines:
+      - clock timezone AU 8 0
+      - ip default-gateway 192.168.9.1
+
+# Many steps taken from Cisco Guide to Harden Cisco IOS Devices
+# https://www.cisco.com/c/en/us/support/docs/ip/access-lists/13608-21.html#anc0
+# IOS 15 disables many services by default
+
+- name: Manage services
+  cisco.ios.ios_service:
+    config:
+      password_encryption: true
+      tcp_keepalives_in: true
+      tcp_keepalives_out: true
+
+- name: Disable LLDP
+  cisco.ios.ios_lldp_global:
+    config:
+      enabled: false
+
+- name: Modify further resources for security
+  cisco.ios.ios_config:
+    lines:
+      - no cdp run
+      - no ip http server
+      - no ip http secure-server
+      - ip ssh version 2 # must specify to limit to ssh2 sessions otherwise will allow ssh1 and 2
+    #  - ip ssh authentication-retries 3 - the default is 3, setting this value shows nothing - setting a different number will show in config

@@ -1,0 +1,106 @@
+- name: Create VLANS
+  cisco.ios.ios_vlans:
+    config:
+      - name: Vlan_5
+        vlan_id: 5
+        mtu: 1500
+        shutdown: disabled
+        state: active
+      - name: Vlan_6
+        vlan_id: 6
+        mtu: 1500
+        shutdown: disabled
+        state: active
+      - name: Vlan_7
+        vlan_id: 7
+        mtu: 1500
+        shutdown: disabled
+        state: active
+      - name: Vlan_9
+        vlan_id: 9
+        mtu: 1500
+        shutdown: disabled
+        state: active
+      - name: Vlan_99
+        vlan_id: 99
+        mtu: 1500
+        shutdown: disabled
+        state: active
+    state: overridden
+
+# by default stp runs in learning & monitoring states, causing port to take 30seconds to become active
+# this ensures only access ports bypass these states BUT still applicable for trunk ports (as it should be)
+# https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst4000/8-2glx/configuration/guide/stp_enha.html#wp1046787
+- name: Enable stp portfast edge on access ports
+  cisco.ios.ios_config:
+    lines:
+      - spanning-tree portfast edge default
+
+- name: Interfaces
+  cisco.ios.ios_interfaces:
+    config:
+      - name: GigabitEthernet0/1
+        description: Brocky
+        enabled: true
+      - name: GigabitEthernet0/2
+        description: Monty
+        enabled: true
+      - name: GigabitEthernet0/3
+        description: Crackers (RIP)
+        enabled: true
+      - name: GigabitEthernet0/4
+        description: Mindy
+        enabled: true
+      - name: GigabitEthernet0/5
+        enabled: false
+      - name: GigabitEthernet0/6
+        enabled: false
+      - name: GigabitEthernet0/7
+        enabled: false
+      - name: GigabitEthernet0/8 # local connectivity
+        enabled: true
+      - name: GigabitEthernet0/9
+        description: Uplink to AP. POE enabled
+        enabled: true
+      - name: GigabitEthernet0/10
+        description: Uplink to Mikrotik Router
+        enabled: true
+      - name: Vlan9
+        description: Management VLAN
+        enabled: true
+    state: replaced
+
+- name: L2 Interface
+  cisco.ios.ios_l2_interfaces:
+    config:
+      - name: GigabitEthernet0/1
+        mode: access
+        access:
+          vlan: 99
+      - name: GigabitEthernet0/2
+        mode: access
+        access:
+          vlan: 99
+      - name: GigabitEthernet0/3
+        mode: access
+        access:
+          vlan: 99
+      - name: GigabitEthernet0/4
+        mode: access
+        access:
+          vlan: 99
+      - name: GigabitEthernet0/8
+        mode: access
+        access:
+          vlan: 5
+      - name: GigabitEthernet0/9
+        mode: trunk
+        trunk:
+          allowed_vlans: 5-7,9
+          native_vlan: 9
+      - name: GigabitEthernet0/10
+        mode: trunk
+        trunk:
+          allowed_vlans: 5-7,9,99
+          native_vlan: 20
+    state: overridden

@@ -132,3 +132,36 @@ Login to AP via `ssh -o RSAMinSize=1024 admin@AP`
 * API Overview: https://ubntwiki.com/products/software/unifi-controller/api
 * API Reverse Engineered: https://github.com/Art-of-WiFi/UniFi-API-client/blob/master/src/Client.php
 * Forum post stating ansible possibility: https://community.ui.com/questions/Its-possible-to-automate-Unifi-Controller-configs/60c753ee-ec19-43f3-b758-cfce6eae6162
+
+-----
+-----
+# Cisco Switch Overview
+
+This will create a config for a Cisco switch.
+
+## Starting from Scratch
+Connect via console cable to apply initial settings.
+
+1. Enter config mode
+    1. `enable`
+    2. `config t`
+2. Create an ansible network account (type 8): `username ansible privilege 15 algorithm-type sha256 <<password>>`
+3. Create host settings `ip domain-name <<domain-name>>`
+4. Generate RSA key
+    1. `crypto key generate rsa`
+    2. Specify `2048`
+5. Enable SSH:
+    ```
+    line vty 0 4
+    login local
+    transport input ssh
+    ```
+6. Enable management interface
+    ```
+    interface vlan9
+    ip address 192.168.9.10 255.255.255.0
+    no shutdown
+    ```
+7. Save config `copy running-config startup-config`
+8. Update `ansible_ssh_pass` in *inventory.yml*
+9. Deploy by running `make switch-deploy`
