@@ -24,7 +24,7 @@
       - allowed-address: 172.16.32.2/32
         interface: wireguard
         comment: Colin Android
-        public-key: LFezMEJ0eBCqLO9N7cE5wy7m9ardlMGcIWs65SexjX4=
+        public-key: YUK7PuFpBS2ooLL+5BfTY88UtqRBMqfL334cDhyI7nw=
       # - allowed-address: 172.16.32.3/32
       #  interface: wireguard
       #  comment:
