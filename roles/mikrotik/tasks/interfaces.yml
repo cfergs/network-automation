@@ -6,6 +6,7 @@
       - name: local
         frame-types: admit-only-vlan-tagged
         ingress-filtering: true
+        pvid: 20
         vlan-filtering: true
 
 - name: Get BridgeInterface name
