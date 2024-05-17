@@ -488,7 +488,7 @@
         chain: forward
         comment: Allow USER to access ingress urls - mgmt, media and others
         dst-address-list: INGRESS_URLS
-        dst-port: 443
+        dst-port: 80,443
         in-interface: USER
         protocol: tcp
 
